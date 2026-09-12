@@ -1,0 +1,284 @@
+/* ==========================================================================
+   TIPOGRAFIA EDITORIALE CONDIVISA
+   Regole usate sia dalle pagine del flipbook (.page-body)
+   sia dalle schede della modalità lettura (.reader-card-body).
+   ========================================================================== */
+
+.page-body,
+.reader-card-body {
+  font-family: var(--font-serif);
+  color: var(--text-main);
+  line-height: var(--lh-body);
+  text-align: left;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  orphans: 2;
+  widows: 2;
+}
+
+/* La giustificazione su colonne strette crea fiumi bianchi: solo da tablet in su */
+@media (min-width: 700px) {
+  .page-body,
+  .reader-card-body {
+    text-align: justify;
+  }
+}
+
+.page-body p,
+.reader-card-body p {
+  margin-bottom: var(--space-para);
+  text-indent: 1.25em;
+}
+
+.page-body > p:first-child,
+.page-body h2 + p,
+.page-body h3 + p,
+.page-body .mystery-heading + p,
+.reader-card-body > p:first-child,
+.reader-card-body h2 + p,
+.reader-card-body h3 + p,
+.reader-card-body .mystery-heading + p {
+  text-indent: 0;
+}
+
+.page-body h2,
+.reader-card-body h2 {
+  font-family: var(--font-title);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  text-align: center;
+  margin: 0.5rem 0 1.1rem;
+  color: var(--accent-color);
+  letter-spacing: 0.05em;
+  break-after: avoid;
+}
+
+.page-body h3,
+.reader-card-body h3 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-style: italic;
+  font-weight: 600;
+  text-align: center;
+  margin: 0.4rem 0 0.8rem;
+  color: var(--text-main);
+  break-after: avoid;
+}
+
+.page-body blockquote,
+.reader-card-body blockquote {
+  font-style: italic;
+  font-size: 0.95em;
+  border-left: 2px solid var(--accent-color);
+  padding: 0.5rem 0.8rem 0.5rem 1.2rem;
+  margin: 1rem 0;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Capolettera */
+.dropcap::first-letter {
+  font-family: var(--font-title);
+  float: left;
+  font-size: 3.2em;
+  line-height: 0.8;
+  padding: 4px 8px 0 0;
+  color: var(--accent-color);
+}
+
+/* --------------------------------------------------- blocchi liturgici ---- */
+.mystery-heading {
+  text-align: center;
+  margin-bottom: 1.25rem;
+  break-after: avoid;
+}
+
+.mystery-number {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: 0.35rem;
+}
+
+.mystery-name {
+  font-family: var(--font-title);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
+.section-title,
+.hymn-title {
+  font-family: var(--font-title);
+  font-size: var(--fs-h2);
+  text-align: center;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+  break-after: avoid;
+}
+
+.prayer-stanza,
+.hymn-stanza {
+  font-style: italic;
+  line-height: 1.65;
+  color: var(--text-main);
+  text-align: center;
+  text-indent: 0;
+  margin: 0.8rem auto;
+  padding: 0.4rem 0;
+}
+
+.prayer-intention {
+  margin: 1.2rem auto 0.6rem;
+  padding: 0.3rem 0;
+  text-align: center;
+  width: 95%;
+}
+
+.prayer-intention p {
+  margin: 0;
+  text-indent: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  line-height: 1.5;
+}
+
+.mystery-reflection {
+  font-style: italic;
+  line-height: 1.55;
+  text-align: center;
+  text-indent: 0;
+  margin: 0.6rem 0 1.1rem;
+}
+
+.prayer-response {
+  font-style: italic;
+  color: var(--accent-color);
+  text-align: center;
+  text-indent: 0;
+  margin: 1.1rem 0 0.4rem;
+}
+
+.source-note,
+.source-credit {
+  font-family: var(--font-sans);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.4;
+  text-indent: 0;
+}
+
+.source-note {
+  text-align: center;
+  margin: 0.8rem 0 0.4rem;
+}
+
+.source-credit {
+  text-align: right;
+  margin-top: 0.8rem;
+}
+
+.editorial-divider {
+  width: 32px;
+  height: 1px;
+  background: rgba(44, 40, 37, 0.2);
+  margin: 0.9rem auto;
+}
+
+/* ----------------------------------------------------------- copertine ---- */
+.cover-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.55rem, 3.5vw, 2.5rem);
+  color: var(--text-cover-gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin-top: 1.5rem;
+}
+
+.cover-subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(0.92rem, 1.6vw, 1.1rem);
+  color: #cbd5e1;
+  margin-top: 0.75rem;
+}
+
+.cover-edition {
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-cover-gold);
+  opacity: 0.9;
+}
+
+.cover-location {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.cover-ornament {
+  width: 48px;
+  height: 2px;
+  background: var(--text-cover-gold);
+  margin: 1.2rem auto;
+  opacity: 0.7;
+}
+
+.backcover-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  line-height: 1.6;
+  font-size: 0.94rem;
+  color: #e2e8f0;
+  text-indent: 0;
+}
+
+.backcover-source {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text-cover-gold);
+  margin-top: 1.2rem;
+  text-indent: 0;
+}
+
+.backcover-imprint p {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-top: 1.5rem;
+  text-indent: 0;
+}
+
+/* ------------------------------------------------- preferenze di sistema --- */
+@media (prefers-contrast: more) {
+  :root {
+    --text-main: #171310;
+    --text-muted: #4a433c;
+    --accent-color: #6e1f0f;
+  }
+
+  .page-body blockquote,
+  .reader-card-body blockquote {
+    border-left-width: 3px;
+    background: rgba(0, 0, 0, 0.05);
+  }
+}

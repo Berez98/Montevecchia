@@ -2,16 +2,26 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Web Flipbook</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/Montevecchia/assets/index-CoXtW5Pg.js"></script>
-  <link rel="stylesheet" crossorigin href="/Montevecchia/assets/index-_sLwz5pg.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rosario a Montevecchia — Edizione sfogliabile</title>
+  <meta name="description" content="Recita del Santo Rosario a Montevecchia: edizione web sfogliabile, con modalità di lettura ottimizzata per smartphone.">
+  <meta name="theme-color" content="#ece8df">
+  <meta name="color-scheme" content="light">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Rosario a Montevecchia">
+  <meta property="og:description" content="Edizione web sfogliabile del Santo Rosario a Montevecchia.">
+  <meta property="og:locale" content="it_IT">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script type="module" crossorigin src="/Montevecchia/assets/index-B992ugTY.js"></script>
+  <link rel="stylesheet" crossorigin href="/Montevecchia/assets/style-B-VmKdL9.css">
 </head>
 <body>
-  <div id="app">
+  <a class="skip-link" href="#book-container">Vai al contenuto</a>
+
+  <div id="app" class="is-loading">
     <!-- Visualizzazione classica Flipbook 3D -->
     <main id="book-container">
       <div id="book" class="flipbook">
@@ -20,26 +30,26 @@
     </main>
 
     <!-- Modalità Smartphone dedicata (scorrimento continuo e alta leggibilità) -->
-    <main id="mobile-reader" class="mobile-reader" style="display:none;" aria-label="Lettura ottimizzata smartphone">
+    <main id="mobile-reader" class="mobile-reader" hidden aria-label="Lettura ottimizzata smartphone">
       <!-- Generato dinamicamente da main.js -->
     </main>
 
     <!-- Barra controlli discreta e minimale a fondo schermo -->
     <nav id="controls" class="controls-bar" aria-label="Controlli di lettura">
       <button id="prev-btn" class="ctrl-btn" type="button" aria-label="Pagina precedente" title="Pagina precedente (Freccia Sinistra)">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
 
-      <div id="page-indicator" class="page-indicator" aria-live="polite">
+      <button id="page-indicator" class="page-indicator" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Vai a una pagina" title="Vai a una pagina">
         <span id="page-current">1</span>
         <span class="page-sep">/</span>
         <span id="page-total">1</span>
-      </div>
+      </button>
 
       <button id="next-btn" class="ctrl-btn" type="button" aria-label="Pagina successiva" title="Pagina successiva (Freccia Destra)">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
@@ -47,25 +57,25 @@
       <div class="ctrl-divider"></div>
 
       <!-- Pulsante Modalità Smartphone / Flipbook -->
-      <button id="view-mode-btn" class="ctrl-btn" type="button" aria-label="Passa a Modalità Smartphone" title="Modalità Smartphone (Scorrimento)">
-        <svg class="icon-mobile" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button id="view-mode-btn" class="ctrl-btn" type="button" aria-label="Passa a Modalità Smartphone" title="Modalità Smartphone (Scorrimento) — tasto M">
+        <svg class="icon-mobile" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
           <line x1="12" y1="18" x2="12.01" y2="18"></line>
         </svg>
-        <svg class="icon-book" style="display:none;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="icon-book" hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
         </svg>
       </button>
 
-      <button id="fullscreen-btn" class="ctrl-btn" type="button" aria-label="Schermo intero" title="Schermo intero">
-        <svg class="icon-expand" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button id="fullscreen-btn" class="ctrl-btn" type="button" aria-label="Schermo intero" title="Schermo intero — tasto F">
+        <svg class="icon-expand" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <polyline points="15 3 21 3 21 9"></polyline>
           <polyline points="9 21 3 21 3 15"></polyline>
           <line x1="21" y1="3" x2="14" y2="10"></line>
           <line x1="3" y1="21" x2="10" y2="14"></line>
         </svg>
-        <svg class="icon-compress" style="display:none;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="icon-compress" hidden viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
           <polyline points="4 14 10 14 10 20"></polyline>
           <polyline points="20 10 14 10 14 4"></polyline>
           <line x1="14" y1="10" x2="21" y2="3"></line>
@@ -73,6 +83,40 @@
         </svg>
       </button>
     </nav>
+
+    <!-- Popover "vai a pagina" -->
+    <div id="goto-popover" class="goto-popover" role="dialog" aria-label="Vai a una pagina" hidden>
+      <label class="goto-label" for="goto-range">Pagina <span id="goto-value">1</span></label>
+      <input id="goto-range" class="goto-range" type="range" min="1" max="1" value="1" step="1">
+      <div class="goto-actions">
+        <button id="goto-cancel" class="goto-btn" type="button">Annulla</button>
+        <button id="goto-confirm" class="goto-btn goto-btn-primary" type="button">Vai</button>
+      </div>
+    </div>
+
+    <!-- Avanzamento di lettura -->
+    <div id="reading-progress" class="reading-progress" aria-hidden="true">
+      <div id="reading-progress-fill" class="reading-progress-fill"></div>
+    </div>
+
+    <!-- Schermata di caricamento -->
+    <div id="app-loading" class="app-loading">
+      <div class="loading-book" aria-hidden="true">
+        <span class="loading-leaf"></span>
+        <span class="loading-leaf"></span>
+      </div>
+      <p class="loading-label">Preparazione del libro…</p>
+    </div>
+
+    <!-- Schermata di errore -->
+    <div id="app-error" class="app-error" role="alert" hidden>
+      <h1>Non è stato possibile aprire il libro</h1>
+      <p id="app-error-detail"></p>
+      <button id="app-error-retry" class="goto-btn goto-btn-primary" type="button">Riprova</button>
+    </div>
+
+    <!-- Annunci per lettori di schermo -->
+    <p id="sr-announcer" class="sr-only" role="status" aria-live="polite"></p>
   </div>
 
 </body>

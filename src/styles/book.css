@@ -1,6 +1,13 @@
+/* ==========================================================================
+   LAYOUT DEL LIBRO 3D
+   La tipografia condivisa vive in typography.css: qui solo struttura,
+   ombre, copertine e adattamenti del flipbook.
+   ========================================================================== */
+
 #app {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--bg-desk);
@@ -14,12 +21,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 1.5rem 4.5rem 1.5rem;
-  box-sizing: border-box;
+  padding: 1rem 1.5rem 4.5rem;
   overflow: hidden;
 }
 
-/* Contenitore flipbook */
 .flipbook {
   box-shadow: var(--shadow-book);
 }
@@ -38,7 +43,6 @@
   outline: 1px solid transparent;
 }
 
-/* Stile comune delle singole pagine */
 .page {
   background-color: var(--bg-page);
   color: var(--text-main);
@@ -48,31 +52,37 @@
   box-shadow: var(--shadow-page-edge);
 }
 
+/* Pagina fuori schermo usata per calcolare quante righe entrano davvero */
+.page-measure {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  visibility: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
 /* Ombra dorsale dinamica in base al verso di apertura */
 .page.--left {
   box-shadow: var(--shadow-spine-left);
-  border-top-left-radius: var(--book-radius);
-  border-bottom-left-radius: var(--book-radius);
+  border-radius: var(--book-radius) 0 0 var(--book-radius);
 }
 
 .page.--right {
   box-shadow: var(--shadow-spine-right);
-  border-top-right-radius: var(--book-radius);
-  border-bottom-right-radius: var(--book-radius);
+  border-radius: 0 var(--book-radius) var(--book-radius) 0;
 }
 
-/* Contenuto interno con margini editoriali protetti */
 .page-content {
   width: 100%;
   height: 100%;
   padding: var(--page-padding);
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-/* Spazio di respiro addizionale vicino al dorso/rilegatura */
+/* Respiro addizionale verso la rilegatura */
 .page.--left .page-content {
   padding-right: calc(var(--page-padding) * 1.25);
 }
@@ -81,7 +91,6 @@
   padding-left: calc(var(--page-padding) * 1.25);
 }
 
-/* Tipografia del corpo editoriale */
 .page-header {
   font-family: var(--font-sans);
   font-size: 0.7rem;
@@ -91,6 +100,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   padding-bottom: 0.25rem;
   margin-bottom: 0.65rem;
+  flex: none;
 }
 
 .page.--left .page-header {
@@ -103,72 +113,10 @@
 
 .page-body {
   flex: 1;
-  font-size: clamp(0.88rem, 1.3vw, 1.08rem);
-  line-height: 1.5;
-  text-align: justify;
-  hyphens: auto;
-  color: var(--text-main);
+  font-size: var(--fs-body);
   overflow: hidden;
 }
 
-.page-body p {
-  margin-bottom: 0.65rem;
-  text-indent: 1.25em;
-}
-
-.page-body p:first-of-type,
-.page-body h2 + p,
-.page-body h3 + p {
-  text-indent: 0;
-}
-
-.page-body h2 {
-  font-family: var(--font-title);
-  font-size: 1.35rem;
-  font-weight: 500;
-  text-align: center;
-  margin-top: 0.5rem;
-  margin-bottom: 1.1rem;
-  color: var(--accent-color);
-  letter-spacing: 0.05em;
-}
-
-.page-body h3 {
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  font-style: italic;
-  font-weight: 600;
-  text-align: center;
-  margin-top: 0.4rem;
-  margin-bottom: 0.8rem;
-  color: var(--text-main);
-}
-
-.page-body blockquote {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.95em;
-  line-height: 1.5;
-  border-left: 2px solid var(--accent-color);
-  padding: 0.5rem 0.8rem 0.5rem 1.2rem;
-  margin: 1rem 0;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 0 4px 4px 0;
-}
-
-/* Drop-cap iniziale */
-.dropcap::first-letter {
-  font-family: var(--font-title);
-  float: left;
-  font-size: 3.2em;
-  line-height: 0.8;
-  padding-top: 4px;
-  padding-right: 8px;
-  padding-bottom: 0;
-  color: var(--accent-color);
-}
-
-/* Numerazione a piè di pagina alternata */
 .page-footer {
   font-family: var(--font-sans);
   font-size: 0.75rem;
@@ -177,6 +125,7 @@
   align-items: center;
   margin-top: 0.4rem;
   padding-top: 0.25rem;
+  flex: none;
 }
 
 .page.--left .page-footer {
@@ -187,7 +136,7 @@
   justify-content: flex-end;
 }
 
-/* Risguardi (Endpaper) */
+/* --------------------------------------------------------- risguardi ----- */
 .page-endpaper {
   background-color: #f7f4ec;
 }
@@ -215,70 +164,58 @@
   text-transform: uppercase;
 }
 
-/* --- Copertine Rigide (Hard Cover) --- */
+/* ------------------------------------------------- copertine cartonate ---- */
 .page-cover {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background-color: var(--bg-cover);
+  background-image:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.35) 100%),
+    var(--texture-paper);
   color: var(--text-cover);
   border-radius: var(--book-radius);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.cover-inner {
+.page-backcover {
+  background-color: var(--bg-cover-back);
+  background-image:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(255, 255, 255, 0.05) 100%),
+    var(--texture-paper);
+  color: #94a3b8;
+}
+
+.cover-inner,
+.backcover-inner {
   height: 100%;
   border: 1px solid rgba(212, 175, 55, 0.4);
-  padding: clamp(2rem, 5vw, 3rem);
+  padding: clamp(1.25rem, 5vw, 3rem);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   text-align: center;
-  box-sizing: border-box;
 }
 
-.cover-title {
-  font-family: var(--font-title);
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  color: var(--text-cover-gold);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-top: 2rem;
-  line-height: 1.2;
+.cover-inner {
+  justify-content: space-between;
 }
 
-.cover-subtitle {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1.1rem;
-  color: #cbd5e1;
-  margin-top: 0.75rem;
+.backcover-inner {
+  justify-content: center;
+  border-color: rgba(212, 175, 55, 0.3);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .cover-top,
-.cover-bottom {
+.cover-bottom,
+.cover-middle {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.cover-edition {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-cover-gold);
-  opacity: 0.9;
-}
-
-.cover-location {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.88rem;
-  color: #94a3b8;
-  letter-spacing: 0.05em;
+  width: 100%;
 }
 
 .cover-photo-frame {
-  margin: 1.5rem auto 0.5rem auto;
+  margin: 1.5rem auto 0.5rem;
   border: 1px dashed rgba(212, 175, 55, 0.45);
   border-radius: 6px;
   padding: 1rem 1.5rem;
@@ -298,9 +235,8 @@
   letter-spacing: 0.05em;
 }
 
-/* Cornice fotografica per la copertina */
 .cover-photo-wrapper {
-  margin: 1.4rem auto 0.6rem auto;
+  margin: 1.4rem auto 0.6rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -318,192 +254,16 @@
 }
 
 .cover-photo {
-  width: 145px;
-  height: 145px;
+  width: clamp(96px, 22vw, 145px);
+  height: clamp(96px, 22vw, 145px);
   border-radius: 50%;
   object-fit: cover;
-  object-position: center;
   display: block;
 }
 
-.cover-ornament {
-  width: 48px;
-  height: 2px;
-  background: var(--text-cover-gold);
-  margin: 1.2rem auto;
-  opacity: 0.7;
-}
-
-/* Stili specifici per i Misteri e le Preghiere */
-.mystery-heading {
-  text-align: center;
-  margin-bottom: 1.25rem;
-}
-
-.mystery-number {
-  display: block;
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-color);
-  margin-bottom: 0.35rem;
-}
-
-.mystery-name {
-  font-family: var(--font-title);
-  font-size: 1.28rem;
-  font-weight: 500;
-  color: var(--text-main);
-  line-height: 1.35;
-  letter-spacing: 0.02em;
-}
-
-.section-title {
-  font-family: var(--font-title);
-  font-size: 1.3rem;
-  text-align: center;
-  color: var(--accent-color);
-  margin-bottom: 1.2rem;
-}
-
-/* Preghiere stanziali in versi (Padre Nostro, Ave Maria, O Gesù mio...) */
-.prayer-stanza {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.95rem;
-  line-height: 1.65;
-  color: var(--text-main);
-  background: transparent;
-  border: none;
-  padding: 0.4rem 0;
-  margin: 0.8rem auto;
-  text-align: center;
-}
-
-/* Intenzioni comunitarie: tipografia pulita ed essenziale, nessun box né simboli */
-.prayer-intention {
-  margin: 1.2rem auto 0.6rem auto;
-  padding: 0.3rem 0;
-  background: transparent;
-  border: none;
-  text-align: center;
-  width: 95%;
-}
-
-.prayer-intention p {
-  margin: 0;
-  text-indent: 0;
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent-color);
-  line-height: 1.5;
-}
-
-/* Meditazione del mistero */
-.mystery-reflection {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.94rem;
-  color: var(--text-main);
-  line-height: 1.55;
-  text-align: center;
-  margin: 0.6rem 0 1.1rem 0;
-}
-
-/* Invocazione mariana finale */
-.prayer-response {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.95rem;
-  color: var(--accent-color);
-  text-align: center;
-  margin-top: 1.1rem;
-  margin-bottom: 0.4rem;
-}
-
-/* Nota della fonte (es. Intenzioni tratte dal discorso...) */
-.source-note {
-  font-family: var(--font-sans);
-  font-size: 0.74rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-  margin: 0.8rem 0 0.4rem 0;
-  text-align: center;
-  font-style: italic;
-}
-
-/* Inno / Canto finale */
-.hymn-title {
-  font-family: var(--font-title);
-  font-size: 1.25rem;
-  text-align: center;
-  color: var(--accent-color);
-  margin-bottom: 0.9rem;
-}
-
-.hymn-stanza {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.92rem;
-  line-height: 1.6;
-  margin-bottom: 0.8rem;
-  text-align: center;
-  color: var(--text-main);
-}
-
-.source-credit {
-  font-family: var(--font-sans);
-  font-size: 0.74rem;
-  color: var(--text-muted);
-  text-align: right;
-  margin-top: 0.8rem;
-  font-style: italic;
-}
-
-.editorial-divider {
-  width: 32px;
-  height: 1px;
-  background: rgba(44, 40, 37, 0.2);
-  margin: 0.9rem auto;
-}
-
-/* Retrocopertina */
-.page-backcover {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #94a3b8;
-}
-
-.backcover-inner {
-  height: 100%;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  box-sizing: border-box;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-/* Indice / Sommario */
-.page-toc h2 {
-  font-family: var(--font-title);
-  font-size: 1.35rem;
-  text-align: center;
-  color: var(--accent-color);
-  margin-bottom: 1.5rem;
-}
-
+/* ----------------------------------------------------- indice/sommario ---- */
 .toc-list {
   list-style: none;
-  width: 100%;
 }
 
 .toc-item {
@@ -533,22 +293,17 @@
 }
 
 /* ==========================================================================
-   Ottimizzazione Specifica per Schermi Smartphone (<= 768px)
+   Smartphone e tablet verticale
    ========================================================================== */
 @media (max-width: 768px) {
   #book-container {
-    padding: 0.4rem 0.4rem 3.8rem 0.4rem;
+    padding: 0.4rem 0.4rem 3.8rem;
   }
 
-  .page-content {
-    padding: 0.85rem 0.95rem;
-  }
-
-  /* In portrait su mobile c'è una sola pagina, azzeriamo la disparità del margine dorsale */
+  .page-content,
   .page.--left .page-content,
   .page.--right .page-content {
-    padding-left: 0.95rem;
-    padding-right: 0.95rem;
+    padding: 0.85rem 0.95rem;
   }
 
   .page-header {
@@ -557,55 +312,7 @@
     padding-bottom: 0.3rem;
   }
 
-  .page-body {
-    font-size: 0.88rem;
-    line-height: 1.44;
-  }
-
-  .page-body p {
-    margin-bottom: 0.65rem;
-  }
-
-  .mystery-heading {
-    margin-bottom: 0.8rem;
-  }
-
-  .mystery-number {
-    font-size: 0.68rem;
-  }
-
-  .mystery-name {
-    font-size: 1.12rem;
-  }
-
-  .prayer-stanza {
-    font-size: 0.88rem;
-    line-height: 1.55;
-    padding: 0.5rem 0.75rem;
-    margin: 0.75rem 0;
-  }
-
-  .prayer-intention {
-    font-size: 0.76rem;
-    padding: 0.5rem 0.65rem;
-    margin: 0.75rem 0;
-  }
-
-  .cover-inner {
-    padding: 1.25rem 1rem;
-  }
-
   .cover-title {
-    font-size: 1.55rem;
     margin-top: 1rem;
-  }
-
-  .cover-subtitle {
-    font-size: 0.92rem;
-  }
-
-  .cover-photo-frame {
-    margin: 0.75rem auto 0.4rem auto;
-    padding: 0.5rem 0.8rem;
   }
 }

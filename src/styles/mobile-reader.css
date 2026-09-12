@@ -1,37 +1,43 @@
 /* ==========================================================================
-   MODALITÀ SMARTPHONE (MOBILE READER)
-   Layout a scorrimento continuo, ottimizzato specificamente per display verticali
+   MODALITÀ LETTURA CONTINUA (SMARTPHONE)
+   La tipografia del testo è condivisa con il flipbook (typography.css).
    ========================================================================== */
 
-:root {
-  --reader-font-size: 1.05rem;
-  --reader-line-height: 1.6;
-}
-
-/* Contenitore principale del lettore smartphone */
 .mobile-reader {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   background-color: #f7f4ee;
   background-image: radial-gradient(circle at 50% 10%, #fffdfa 0%, #f4f0e6 100%);
   color: var(--text-main);
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(44, 40, 37, 0.35) transparent;
   z-index: 500;
   display: flex;
   flex-direction: column;
 }
 
-/* Barra superiore fissa */
+.mobile-reader::-webkit-scrollbar {
+  width: 8px;
+}
+
+.mobile-reader::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-reader::-webkit-scrollbar-thumb {
+  background: rgba(44, 40, 37, 0.28);
+  border-radius: 9999px;
+}
+
+/* ---------------------------------------------------------- barra alta ---- */
 .reader-topbar {
   position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
+  flex: none;
   height: 54px;
   background: rgba(251, 249, 245, 0.94);
   backdrop-filter: blur(12px);
@@ -40,6 +46,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   padding: 0 1rem;
   z-index: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -49,6 +56,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  min-height: 44px;
   background: transparent;
   border: 1px solid rgba(44, 40, 37, 0.15);
   border-radius: 9999px;
@@ -57,8 +65,7 @@
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-main);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .reader-btn:hover,
@@ -66,6 +73,13 @@
   background: rgba(0, 0, 0, 0.05);
   color: var(--accent-color);
   border-color: var(--accent-color);
+}
+
+.reader-btn:focus-visible,
+.reader-font-btn:focus-visible,
+.reader-toc-link:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .reader-title-badge {
@@ -87,8 +101,8 @@
 }
 
 .reader-font-btn {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -99,19 +113,17 @@
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-main);
-  cursor: pointer;
 }
 
 .reader-font-btn:active {
   background: rgba(0, 0, 0, 0.08);
 }
 
-/* Cassetto / Menu Indice dei Contenuti */
+/* -------------------------------------------------------------- indice ---- */
 .reader-drawer {
   position: sticky;
   top: 54px;
-  left: 0;
-  right: 0;
+  flex: none;
   background: #fbf9f5;
   border-bottom: 2px solid var(--accent-color);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
@@ -119,23 +131,12 @@
   z-index: 590;
   max-height: 70vh;
   overflow-y: auto;
-  display: none;
-  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: readerDrawerIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.reader-drawer.is-open {
-  display: block;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes readerDrawerIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .reader-drawer-title {
@@ -156,35 +157,32 @@
 
 .reader-toc-link {
   display: block;
-  padding: 0.6rem 0.8rem;
+  padding: 0.7rem 0.8rem;
   border-radius: 6px;
   color: var(--text-main);
   font-family: var(--font-sans);
   font-size: 0.9rem;
   text-decoration: none;
   background: rgba(0, 0, 0, 0.02);
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .reader-toc-link:hover,
 .reader-toc-link:active {
   background: rgba(140, 45, 25, 0.08);
   color: var(--accent-color);
-  font-weight: 500;
   transform: translateX(4px);
 }
 
-/* Corpo del testo a scorrimento */
+/* --------------------------------------------------------- contenuto ----- */
 .reader-content {
   flex: 1;
   max-width: 680px;
   width: 100%;
   margin: 0 auto;
-  padding: 1.25rem 1rem 5rem 1rem;
-  box-sizing: border-box;
+  padding: 1.25rem 1rem 5rem;
 }
 
-/* Sezioni e schede di lettura */
 .reader-card {
   background: #fbf9f5;
   border: 1px solid rgba(44, 40, 37, 0.08);
@@ -192,7 +190,6 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   padding: 1.5rem 1.25rem;
   margin-bottom: 1.75rem;
-  position: relative;
 }
 
 .reader-card-header {
@@ -208,27 +205,29 @@
 }
 
 .reader-card-body {
-  font-family: var(--font-serif);
   font-size: var(--reader-font-size);
   line-height: var(--reader-line-height);
-  color: var(--text-main);
-  text-align: justify;
-  hyphens: auto;
 }
 
-.reader-card-body p {
-  margin-bottom: 0.9rem;
-  text-indent: 1.25em;
+/* Nel reader le pagine sono già estratte: struttura del flipbook neutralizzata */
+.reader-card-body .page-content {
+  display: block;
+  height: auto;
+  padding: 0;
 }
 
-.reader-card-body p:first-of-type,
-.reader-card-body h2 + p,
-.reader-card-body .mystery-heading + p {
-  text-indent: 0;
+.reader-card-body .page-header,
+.reader-card-body .page-footer {
+  display: none;
 }
 
-/* Copertina in modalità smartphone */
-.reader-card-cover {
+.reader-card-body .page-body {
+  overflow: visible;
+  font-size: inherit;
+}
+
+.reader-card-cover,
+.reader-card-backcover {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #f8fafc;
   border: 1px solid rgba(212, 175, 55, 0.3);
@@ -236,25 +235,16 @@
   padding: 2.2rem 1.5rem;
 }
 
-.reader-card-cover .cover-title {
-  font-size: 1.8rem;
-  margin-top: 1rem;
-  color: var(--text-cover-gold);
-}
-
-.reader-card-cover .cover-subtitle {
-  color: #cbd5e1;
-  font-size: 1.05rem;
-  margin-top: 0.5rem;
-}
-
-/* Quarta di copertina in modalità smartphone */
 .reader-card-backcover {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: #94a3b8;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  text-align: center;
-  padding: 2.2rem 1.5rem;
+}
+
+.reader-card-cover .cover-inner,
+.reader-card-backcover .backcover-inner {
+  border: none;
+  padding: 0;
+  height: auto;
 }
 
 .reader-separator {
@@ -264,25 +254,23 @@
   margin: 2rem auto;
 }
 
-/* Pulsante flottante per tornare in cima */
+/* --------------------------------------------------------- torna su ------ */
 .reader-back-to-top {
   position: fixed;
   bottom: 1.25rem;
   right: 1.25rem;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--text-main);
   color: #fff;
-  border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.25s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
   z-index: 550;
 }
 

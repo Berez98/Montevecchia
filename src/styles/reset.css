@@ -24,3 +24,56 @@ button {
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Le viste usano l'attributo `hidden`: deve vincere sui display di layout */
+[hidden] {
+  display: none !important;
+}
+
+img {
+  max-width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -110%);
+  z-index: 2000;
+  padding: 0.6rem 1.1rem;
+  background: var(--text-main);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

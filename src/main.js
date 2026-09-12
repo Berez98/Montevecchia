@@ -1,58 +1,56 @@
 import { PageFlip } from 'page-flip';
 import bookSource from '../content/book-source.txt?raw';
 import roseImage from '../content/Rose.jpeg';
-import { parseRawContent, SAMPLE_PAGES } from './utils/parser.js';
-import { setupControls } from './utils/controls.js';
+import { buildPages } from './parser/index.js';
+import { computePageBox, createMeasurer } from './parser/measure.js';
+import { setupControls } from './ui/controls.js';
+import { renderReader, setupReaderControls } from './ui/reader.js';
+import { getState, setState, subscribe, restorePersistedState } from './state/store.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initBook();
-});
+const REBUILD_THRESHOLD_PX = 16;
+const RESIZE_DEBOUNCE_MS = 200;
 
-function initBook() {
-  const bookElement = document.getElementById('book');
-  if (!bookElement) return;
+let pageFlip = null;
+let lastBox = null;
+let resizeTimer = null;
 
-  // Ingestione del testo sorgente tramite il parser editoriale con l'immagine di copertina
-  let pages = parseRawContent(bookSource, 620, roseImage);
-  if (!pages || pages.length === 0) {
-    pages = SAMPLE_PAGES;
-  }
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const nextFrame = (fn) => requestAnimationFrame(() => requestAnimationFrame(fn));
 
-  // 1. Popolamento e generazione della Modalità Smartphone (scorrimento continuo)
-  initMobileReader(pages);
+function el(id) {
+  return document.getElementById(id);
+}
 
-  // 2. Generazione del Flipbook 3D
+// ---------------------------------------------------------------- costruzione
+function renderPages(bookElement, pages) {
   bookElement.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   pages.forEach((page, index) => {
-    const pageDiv = document.createElement('div');
-    
-    // In StPageFlip con showCover:true:
-    // Indice 0: Copertina frontale (lato destro a libro chiuso)
-    // Indici dispari (1, 3, 5...): Pagina sinistra nello spread aperto
-    // Indici pari (2, 4, 6...): Pagina destra nello spread aperto
     const isLeft = index % 2 === 1;
     const isCover = index === 0;
     const isBackCover = index === pages.length - 1;
 
-    let pageTypeClass = '';
-    if (page.type === 'cover' || isCover) {
-      pageTypeClass = 'page-cover';
-    } else if (page.type === 'backcover' || isBackCover) {
-      pageTypeClass = 'page-backcover';
-    } else if (page.type === 'endpaper') {
-      pageTypeClass = 'page-endpaper';
-    }
+    let typeClass = '';
+    if (page.type === 'cover' || isCover) typeClass = 'page-cover';
+    else if (page.type === 'backcover' || isBackCover) typeClass = 'page-backcover';
+    else if (page.type === 'endpaper') typeClass = 'page-endpaper';
 
-    pageDiv.className = `page ${pageTypeClass} ${isLeft ? '--left' : '--right'}`.trim();
-    pageDiv.setAttribute('data-density', page.density || ((isCover || isBackCover) ? 'hard' : 'soft'));
-    pageDiv.innerHTML = page.html;
-
-    bookElement.appendChild(pageDiv);
+    const node = document.createElement('div');
+    node.className = `page ${typeClass} ${isLeft ? '--left' : '--right'}`.replace(/\s+/g, ' ').trim();
+    node.setAttribute('data-density', page.density || (isCover || isBackCover ? 'hard' : 'soft'));
+    node.setAttribute('role', 'group');
+    node.setAttribute('aria-roledescription', 'pagina');
+    node.setAttribute('aria-label', page.title || `Pagina ${index + 1}`);
+    node.innerHTML = page.html;
+    fragment.appendChild(node);
   });
 
-  // Istanziazione di StPageFlip con proporzioni responsive e swipe calibrato
-  const pageFlip = new PageFlip(bookElement, {
+  bookElement.appendChild(fragment);
+}
+
+function createFlipEngine(bookElement) {
+  const flip = new PageFlip(bookElement, {
     width: 450,
     height: 600,
     size: 'stretch',
@@ -67,107 +65,168 @@ function initBook() {
     usePortrait: true,
     autoSize: true,
     drawShadow: true,
-    flippingTime: 600,
+    // PageFlip rifiuta il valore 0: con reduced-motion si usa la durata minima
+    flippingTime: prefersReducedMotion() ? 1 : 600,
     useMouseEvents: true
   });
 
-  // Caricamento elementi DOM nell'engine di sfoglio
-  const pageNodes = bookElement.querySelectorAll('.page');
-  pageFlip.loadFromHTML(pageNodes);
-
-  // Inizializzazione della barra di navigazione e controlli (incluso switch smartphone/flipbook)
-  setupControls(pageFlip);
-
-  console.log('Web Flipbook e Modalità Smartphone inizializzati con successo. Pagine:', pages.length);
+  flip.loadFromHTML(bookElement.querySelectorAll('.page'));
+  return flip;
 }
 
-/**
- * Genera l'interfaccia a scorrimento continuo per la Modalità Smartphone
- */
-function initMobileReader(pages) {
-  const readerEl = document.getElementById('mobile-reader');
-  if (!readerEl) return;
+function buildBook({ preservePage = true } = {}) {
+  const container = el('book-container');
+  if (!container) throw new Error('Contenitore del libro non trovato.');
 
-  const topbar = `
-    <header class="reader-topbar">
-      <button id="reader-switch-flip-btn" class="reader-btn" type="button" title="Torna allo sfoglio 3D">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
-        <span>Sfoglia 3D</span>
-      </button>
+  const box = computePageBox(container);
+  const measurer = box ? createMeasurer(box) : null;
 
-      <span class="reader-title-badge">Santo Rosario</span>
+  let pages;
+  try {
+    pages = buildPages(bookSource, { coverImageUrl: roseImage, measurer });
+  } finally {
+    measurer?.destroy();
+  }
 
-      <div class="reader-actions">
-        <button id="reader-toc-toggle-btn" class="reader-btn" type="button" title="Indice dei contenuti">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-          <span>Indice</span>
-        </button>
-        <button id="reader-font-dec" class="reader-font-btn" type="button" title="Riduci testo">A-</button>
-        <button id="reader-font-inc" class="reader-font-btn" type="button" title="Ingrandisci testo">A+</button>
-      </div>
-    </header>
-  `;
+  const previousRatio =
+    preservePage && getState().total > 1 ? getState().currentPage / (getState().total - 1) : null;
 
-  // Menu rapido di navigazione (Indice dei contenuti)
-  const tocItems = pages
-    .filter(p => p.type !== 'endpaper')
-    .map((p, i) => `
-      <li>
-        <a href="#reader-section-${i}" class="reader-toc-link">
-          ${p.title || p.header || `Sezione ${i + 1}`}
-        </a>
-      </li>
-    `).join('');
+  // StPageFlip avvolge il nodo che riceve: si riparte sempre da un contenitore pulito
+  pageFlip?.destroy();
+  pageFlip = null;
+  container.innerHTML = '';
+  const bookElement = document.createElement('div');
+  bookElement.id = 'book';
+  bookElement.className = 'flipbook';
+  container.appendChild(bookElement);
 
-  const drawer = `
-    <nav id="reader-drawer" class="reader-drawer" aria-label="Indice dei misteri">
-      <div class="reader-drawer-title">Indice dei Contenuti</div>
-      <ul class="reader-toc-links">
-        ${tocItems}
-      </ul>
-    </nav>
-  `;
+  renderPages(bookElement, pages);
+  pageFlip = createFlipEngine(bookElement);
 
-  // Schede di lettura fluide
-  const cardsHtml = pages
-    .filter(p => p.type !== 'endpaper')
-    .map((p, i) => {
-      let cardClass = 'reader-card';
-      if (p.type === 'cover') cardClass += ' reader-card-cover';
-      if (p.type === 'backcover') cardClass += ' reader-card-backcover';
+  const total = pageFlip.getPageCount();
+  setState({ pages, total });
 
-      return `
-        <article id="reader-section-${i}" class="${cardClass}">
-          ${(p.type !== 'cover' && p.type !== 'backcover') ? `<div class="reader-card-header">${p.header || ''}</div>` : ''}
-          <div class="reader-card-body">
-            ${p.html}
-          </div>
-        </article>
-      `;
-    }).join(`
-      <div class="reader-separator"></div>
-    `);
+  const syncPage = () => setState({ currentPage: pageFlip.getCurrentPageIndex() });
+  pageFlip.on('flip', syncPage);
+  pageFlip.on('changeState', syncPage);
 
-  const content = `
-    <div class="reader-content">
-      ${cardsHtml}
-    </div>
-    <button id="reader-back-to-top" class="reader-back-to-top" type="button" aria-label="Torna in cima" title="Torna all'inizio">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="18 15 12 9 6 15"></polyline>
-      </svg>
-    </button>
-  `;
+  const target =
+    previousRatio !== null
+      ? Math.round(previousRatio * (total - 1))
+      : Math.min(getState().currentPage, total - 1);
 
-  readerEl.innerHTML = topbar + drawer + content;
+  if (target > 0) pageFlip.turnToPage(target);
+  setState({ currentPage: pageFlip.getCurrentPageIndex() });
+
+  renderReader(pages);
+  setupReaderControls();
+
+  lastBox = box;
+}
+
+// ------------------------------------------------------------------- viste
+function applyMode(mode) {
+  const bookContainer = el('book-container');
+  const reader = el('mobile-reader');
+  const isReader = mode === 'reader';
+
+  if (bookContainer) bookContainer.hidden = isReader;
+  if (reader) reader.hidden = !isReader;
+  const progress = el('reading-progress');
+  if (progress) progress.hidden = isReader;
+
+  if (isReader) {
+    reader?.scrollTo({ top: 0, behavior: 'auto' });
+  } else {
+    nextFrame(() => {
+      try {
+        pageFlip?.update();
+      } catch {
+        /* l'engine può non essere pronto durante una ricostruzione */
+      }
+    });
+  }
+}
+
+function showError(message) {
+  el('app')?.classList.remove('is-loading');
+  const loading = el('app-loading');
+  if (loading) loading.hidden = true;
+  const box = el('app-error');
+  const detail = el('app-error-detail');
+  if (detail) detail.textContent = message;
+  if (box) box.hidden = false;
+}
+
+// ------------------------------------------------------------------- resize
+function handleResize() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (getState().mode !== 'flipbook') return;
+
+    const box = computePageBox(el('book-container'));
+    if (!box) return;
+
+    const changed =
+      !lastBox ||
+      Math.abs(box.width - lastBox.width) > REBUILD_THRESHOLD_PX ||
+      Math.abs(box.height - lastBox.height) > REBUILD_THRESHOLD_PX ||
+      box.isPortrait !== lastBox.isPortrait;
+
+    if (changed) {
+      // La capienza della pagina è cambiata: va rifatta l'impaginazione
+      try {
+        buildBook({ preservePage: true });
+      } catch (error) {
+        showError(error.message);
+      }
+    } else {
+      pageFlip?.update();
+    }
+  }, RESIZE_DEBOUNCE_MS);
+}
+
+// ---------------------------------------------------------------- bootstrap
+async function start() {
+  restorePersistedState();
+  subscribe((state, changed) => {
+    if (changed.includes('mode')) applyMode(state.mode);
+  });
+
+  try {
+    // I font devono essere caricati prima di misurare, altrimenti l'impaginazione è falsata
+    await document.fonts?.ready;
+  } catch {
+    /* font API non disponibile: si procede con i fallback di sistema */
+  }
+
+  try {
+    buildBook({ preservePage: false });
+    setupControls({ getFlip: () => pageFlip });
+    applyMode(getState().mode);
+
+    el('app')?.classList.remove('is-loading');
+    const loading = el('app-loading');
+    if (loading) loading.hidden = true;
+  } catch (error) {
+    console.error(error);
+    showError('Il testo del libro non è stato caricato correttamente. Riprova a ricaricare la pagina.');
+    return;
+  }
+
+  const container = el('book-container');
+  if (container && 'ResizeObserver' in window) {
+    new ResizeObserver(handleResize).observe(container);
+  } else {
+    window.addEventListener('resize', handleResize);
+  }
+  window.addEventListener('orientationchange', handleResize);
+}
+
+el('app-error-retry')?.addEventListener('click', () => window.location.reload());
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', start, { once: true });
+} else {
+  start();
 }

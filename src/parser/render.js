@@ -138,7 +138,7 @@ export function formatCoverPage(text, coverImageUrl = null) {
       </div>
       <div class="cover-bottom">
         <div class="cover-ornament"></div>
-        <p class="cover-location">Santuario Beata Vergine del Carmelo</p>
+        <p class="cover-location">Santuario della Beata Vergine del Carmelo</p>
       </div>
     </div>
   `;

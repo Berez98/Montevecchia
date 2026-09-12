@@ -1,0 +1,6 @@
+# Incolla qui il tuo testo completo per il Flipbook (Fase 2).
+# Puoi separare esplicitamente le pagine inserendo il delimitatore:
+# ---PAGE---
+#
+# Se non inserisci il delimitatore, il motore frammenterà automaticamente
+# il testo rispettando la struttura dei paragrafi (\n\n).

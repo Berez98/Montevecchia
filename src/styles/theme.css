@@ -1,0 +1,30 @@
+:root {
+  /* Palette Colori Carta & Sfondo */
+  --bg-app: #ece8df;
+  --bg-desk: radial-gradient(circle at center, #f4f1ea 0%, #e8e3d8 100%);
+  --bg-page: #fbf9f5;
+  --bg-cover: #1e293b;
+  --bg-cover-back: #1e293b;
+
+  /* Inchiostri & Testi */
+  --text-main: #2b2723;
+  --text-muted: #6b635b;
+  --text-cover: #f8fafc;
+  --text-cover-gold: #d4af37;
+  --accent-color: #8c2d19;
+
+  /* Tipografia Editoriale */
+  --font-serif: 'EB Garamond', 'Charter', 'Merriweather', Georgia, serif;
+  --font-title: 'Cinzel', 'EB Garamond', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Ombreggiature e Realismo del Libro */
+  --book-radius: 4px;
+  --shadow-book: 0 20px 45px -10px rgba(0, 0, 0, 0.3), 0 8px 18px -6px rgba(0, 0, 0, 0.15);
+  --shadow-spine-left: inset -22px 0 28px -12px rgba(40, 25, 10, 0.18);
+  --shadow-spine-right: inset 22px 0 28px -12px rgba(40, 25, 10, 0.18);
+  --shadow-page-edge: 0 0 2px rgba(0, 0, 0, 0.1);
+
+  /* Dimensioni e Spaziature */
+  --page-padding: clamp(1.6rem, 3.8vw, 2.6rem);
+}

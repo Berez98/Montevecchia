@@ -1,0 +1,247 @@
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-desk);
+  overflow: hidden;
+  position: relative;
+}
+
+#book-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem 4.5rem 1.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Contenitore flipbook */
+.flipbook {
+  box-shadow: var(--shadow-book);
+  transition: transform 0.25s ease;
+  will-change: transform;
+}
+
+/* Stile comune delle singole pagine */
+.page {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-serif);
+  box-shadow: var(--shadow-page-edge);
+}
+
+/* Ombra dorsale dinamica in base al verso di apertura */
+.page.--left {
+  box-shadow: var(--shadow-spine-left);
+  border-top-left-radius: var(--book-radius);
+  border-bottom-left-radius: var(--book-radius);
+}
+
+.page.--right {
+  box-shadow: var(--shadow-spine-right);
+  border-top-right-radius: var(--book-radius);
+  border-bottom-right-radius: var(--book-radius);
+}
+
+/* Contenuto interno con margini editoriali protetti */
+.page-content {
+  width: 100%;
+  height: 100%;
+  padding: var(--page-padding);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Tipografia del corpo editoriale */
+.page-header {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.page-body {
+  flex: 1;
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+  line-height: 1.65;
+  text-align: justify;
+  hyphens: auto;
+  color: var(--text-main);
+}
+
+.page-body p {
+  margin-bottom: 1rem;
+  text-indent: 1.25em;
+}
+
+.page-body p:first-of-type {
+  text-indent: 0;
+}
+
+.page-body h2 {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  color: var(--accent-color);
+  letter-spacing: 0.05em;
+}
+
+/* Drop-cap iniziale */
+.dropcap::first-letter {
+  font-family: var(--font-title);
+  float: left;
+  font-size: 3.2em;
+  line-height: 0.8;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 0;
+  color: var(--accent-color);
+}
+
+/* Numerazione a piè di pagina */
+.page-footer {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.4rem;
+}
+
+.page.--left .page-footer {
+  justify-content: flex-start;
+}
+
+.page.--right .page-footer {
+  justify-content: flex-end;
+}
+
+/* --- Copertine Rigide (Hard Cover) --- */
+.page-cover {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: var(--text-cover);
+  border-radius: var(--book-radius);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cover-inner {
+  height: 100%;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: clamp(2rem, 5vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.cover-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  color: var(--text-cover-gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 2rem;
+  line-height: 1.2;
+}
+
+.cover-subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #cbd5e1;
+  margin-top: 0.75rem;
+}
+
+.cover-author {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+.cover-ornament {
+  width: 48px;
+  height: 2px;
+  background: var(--text-cover-gold);
+  margin: 1.5rem auto;
+  opacity: 0.7;
+}
+
+/* Retrocopertina */
+.page-backcover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #94a3b8;
+}
+
+.backcover-inner {
+  height: 100%;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Indice / Sommario */
+.page-toc h2 {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  text-align: center;
+  color: var(--accent-color);
+  margin-bottom: 1.5rem;
+}
+
+.toc-list {
+  list-style: none;
+  width: 100%;
+}
+
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 0.9rem;
+  font-size: 0.95rem;
+}
+
+.toc-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toc-dots {
+  flex: 2;
+  border-bottom: 1px dotted rgba(0, 0, 0, 0.25);
+  margin: 0 0.5rem;
+}
+
+.toc-num {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

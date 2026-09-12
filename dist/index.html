@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Web Flipbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="./assets/index-uNYHDMWZ.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-hauemET7.css">
+</head>
+<body>
+  <div id="app">
+    <main id="book-container">
+      <div id="book" class="flipbook">
+        <!-- Le pagine verranno generate dinamicamente da main.js -->
+      </div>
+    </main>
+
+    <!-- Barra controlli discreta e minimale a fondo schermo -->
+    <nav id="controls" class="controls-bar" aria-label="Controlli di lettura">
+      <button id="prev-btn" class="ctrl-btn" type="button" aria-label="Pagina precedente" title="Pagina precedente (Freccia Sinistra)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <div id="page-indicator" class="page-indicator" aria-live="polite">
+        <span id="page-current">1</span>
+        <span class="page-sep">/</span>
+        <span id="page-total">1</span>
+      </div>
+
+      <button id="next-btn" class="ctrl-btn" type="button" aria-label="Pagina successiva" title="Pagina successiva (Freccia Destra)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <div class="ctrl-divider"></div>
+
+      <button id="fullscreen-btn" class="ctrl-btn" type="button" aria-label="Schermo intero" title="Schermo intero">
+        <svg class="icon-expand" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <svg class="icon-compress" style="display:none;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 14 10 14 10 20"></polyline>
+          <polyline points="20 10 14 10 14 4"></polyline>
+          <line x1="14" y1="10" x2="21" y2="3"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+    </nav>
+  </div>
+
+</body>
+</html>

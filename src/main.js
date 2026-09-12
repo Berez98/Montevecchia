@@ -68,7 +68,7 @@ function initBook() {
     bookElement.appendChild(pageDiv);
   });
 
-  // Istanziazione di StPageFlip con proporzioni responsive e supporto touch avanzato
+  // Istanziazione di StPageFlip con proporzioni responsive e swipe calibrato
   const pageFlip = new PageFlip(bookElement, {
     width: 450,
     height: 600,
@@ -77,13 +77,14 @@ function initBook() {
     maxWidth: 600,
     minHeight: 380,
     maxHeight: 850,
-    maxShadowOpacity: 0.5,
+    maxShadowOpacity: 0.4,
     showCover: true,
-    mobileScrollSupport: true,
+    mobileScrollSupport: false,
+    swipeDistance: 60,
     usePortrait: true,
     autoSize: true,
     drawShadow: true,
-    flippingTime: 700,
+    flippingTime: 600,
     useMouseEvents: true
   });
 

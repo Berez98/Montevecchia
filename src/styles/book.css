@@ -22,8 +22,20 @@
 /* Contenitore flipbook */
 .flipbook {
   box-shadow: var(--shadow-book);
-  transition: transform 0.25s ease;
-  will-change: transform;
+}
+
+/* Stabilità rendering 3D e prevenzione glitch grafici durante lo sfoglio */
+.flipbook,
+.stf__parent,
+.stf__wrapper,
+.stf__block,
+.stf__item,
+.page {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: flat;
+  transform-style: flat;
+  outline: 1px solid transparent;
 }
 
 /* Stile comune delle singole pagine */
@@ -72,13 +84,13 @@
 /* Tipografia del corpo editoriale */
 .page-header {
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding-bottom: 0.4rem;
-  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.65rem;
 }
 
 .page.--left .page-header {
@@ -91,30 +103,16 @@
 
 .page-body {
   flex: 1;
-  font-size: clamp(0.92rem, 1.35vw, 1.12rem);
-  line-height: 1.55;
+  font-size: clamp(0.88rem, 1.3vw, 1.08rem);
+  line-height: 1.5;
   text-align: justify;
   hyphens: auto;
   color: var(--text-main);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(140, 45, 25, 0.25) transparent;
-}
-
-.page-body::-webkit-scrollbar {
-  width: 4px;
-}
-
-.page-body::-webkit-scrollbar-thumb {
-  background-color: rgba(140, 45, 25, 0.25);
-  border-radius: 4px;
+  overflow: hidden;
 }
 
 .page-body p {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.65rem;
   text-indent: 1.25em;
 }
 
@@ -173,12 +171,12 @@
 /* Numerazione a piè di pagina alternata */
 .page-footer {
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
-  margin-top: 0.75rem;
-  padding-top: 0.4rem;
+  margin-top: 0.4rem;
+  padding-top: 0.25rem;
 }
 
 .page.--left .page-footer {
@@ -346,13 +344,13 @@
 .prayer-stanza {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--text-main);
   background: rgba(140, 45, 25, 0.04);
   border-left: 2px solid var(--accent-color);
-  padding: 0.75rem 1.2rem;
-  margin: 1.2rem 0;
+  padding: 0.6rem 1rem;
+  margin: 0.75rem 0;
   border-radius: 0 4px 4px 0;
 }
 
@@ -360,16 +358,16 @@
 .prayer-intention {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.45rem;
   background: rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 4px;
-  padding: 0.75rem 1rem;
-  margin: 1.2rem 0;
+  padding: 0.55rem 0.8rem;
+  margin: 0.75rem 0;
   font-family: var(--font-sans);
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  line-height: 1.45;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
   color: var(--text-main);
 }
 

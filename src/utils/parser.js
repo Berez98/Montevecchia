@@ -141,7 +141,7 @@ export const SAMPLE_PAGES = [
  * @param {number} maxCharsPerPage - Soglia caratteri per pagina in modalità automatica
  * @returns {Array<{type: string, density: string, html: string, pageNumber: number}>}
  */
-export function parseRawContent(rawText, maxCharsPerPage = 1100) {
+export function parseRawContent(rawText, maxCharsPerPage = 620) {
   if (!rawText || typeof rawText !== 'string') {
     return SAMPLE_PAGES;
   }
@@ -159,10 +159,23 @@ export function parseRawContent(rawText, maxCharsPerPage = 1100) {
   let rawPages = [];
   const pageDelimiterRegex = /[-]{2,}\s*PAGE\s*[-]{2,}/i;
   if (pageDelimiterRegex.test(trimmed)) {
-    rawPages = trimmed
+    const rawSections = trimmed
       .split(/[-]{2,}\s*PAGE\s*[-]{2,}/gi)
       .map(p => p.trim())
       .filter(Boolean);
+
+    // Per ogni sezione, se il testo eccede la capienza di una pagina (maxCharsPerPage),
+    // lo suddividiamo automaticamente su più pagine per evitare qualsiasi troncamento o overflow.
+    rawPages = [];
+    rawSections.forEach((sec, idx) => {
+      if (idx === 0) {
+        // La copertina rimane pagina singola
+        rawPages.push(sec);
+      } else {
+        const subPages = paginateChunk(sec, maxCharsPerPage);
+        subPages.forEach(p => rawPages.push(p));
+      }
+    });
   } else {
     // 2. Frammentazione automatica rispettando i paragrafi (\n\n)
     const paragraphs = trimmed
@@ -260,6 +273,61 @@ export function parseRawContent(rawText, maxCharsPerPage = 1100) {
   });
 
   return generatedPages;
+}
+
+/**
+ * Suddivide un testo lungo in sotto-pagine bilanciate rispettando frasi e paragrafi
+ */
+function paginateChunk(text, maxChars = 620) {
+  if (text.length <= maxChars) return [text];
+
+  const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  const chunks = [];
+  let currentGroup = [];
+  let currentLen = 0;
+
+  for (const para of paragraphs) {
+    if (para.length > maxChars) {
+      if (currentGroup.length > 0) {
+        chunks.push(currentGroup.join('\n\n'));
+        currentGroup = [];
+        currentLen = 0;
+      }
+      // Spezza il singolo paragrafo lungo sulle frasi
+      const sentences = para.split(/(?<=[.?!»])\s+/);
+      let sGroup = [];
+      let sLen = 0;
+      for (const s of sentences) {
+        if (sLen + s.length > maxChars && sGroup.length > 0) {
+          chunks.push(sGroup.join(' '));
+          sGroup = [s];
+          sLen = s.length;
+        } else {
+          sGroup.push(s);
+          sLen += s.length;
+        }
+      }
+      if (sGroup.length > 0) {
+        currentGroup.push(sGroup.join(' '));
+        currentLen = sLen;
+      }
+    } else {
+      if (currentLen + para.length > maxChars && currentGroup.length > 0) {
+        chunks.push(currentGroup.join('\n\n'));
+        currentGroup = [para];
+        currentLen = para.length;
+      } else {
+        currentGroup.push(para);
+        currentLen += para.length;
+      }
+    }
+  }
+
+  if (currentGroup.length > 0) {
+    chunks.push(currentGroup.join('\n\n'));
+  }
+
+  return chunks;
 }
 
 function detectPageHeader(text) {

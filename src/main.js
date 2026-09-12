@@ -17,24 +17,6 @@ function initBook() {
     pages = SAMPLE_PAGES;
   }
 
-  // Regola editoriale: un libro con copertine rigide (showCover: true) richiede
-  // un numero pari di facciate affinché la retrocopertina chiuda all'esterno
-  if (pages.length > 2 && pages.length % 2 !== 0) {
-    const backCover = pages.pop();
-    pages.push({
-      type: 'endpaper',
-      density: 'soft',
-      pageNumber: pages.length + 1,
-      html: `
-        <div class="page-content endpaper-inner">
-          <div class="endpaper-ornament">✦</div>
-          <p class="endpaper-text">Note</p>
-        </div>
-      `
-    });
-    pages.push(backCover);
-  }
-
   // 1. Popolamento e generazione della Modalità Smartphone (scorrimento continuo)
   initMobileReader(pages);
 
@@ -172,7 +154,7 @@ function initMobileReader(pages) {
         </article>
       `;
     }).join(`
-      <div class="reader-separator">✦ ✦ ✦</div>
+      <div class="reader-separator"></div>
     `);
 
   const content = `

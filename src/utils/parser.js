@@ -335,11 +335,14 @@ function detectPageHeader(text) {
   if (misteroMatch) {
     return `${misteroMatch[1]} Mistero Glorioso`;
   }
-  if (/Intenzioni tratte dal discorso/i.test(text)) {
+  if (/Intenzioni tratte|L’amore è la forza|San Giovanni Paolo/i.test(text)) {
     return 'Intenzioni di Preghiera';
   }
-  if (/Canto finale/i.test(text)) {
+  if (/Canto finale|Ave Maria, splendore/i.test(text)) {
     return 'Canto Finale';
+  }
+  if (/Quos redemisti|Giussani|C’è un nulla che non viene perduto/i.test(text)) {
+    return 'Riflessione Conclusiva';
   }
   if (/^#{1,3}\s+(.+)$/m.test(text)) {
     const titleMatch = text.match(/^#{1,3}\s+(.+)$/m);
@@ -521,8 +524,18 @@ function formatBodyPage(text, pageNum, runningHeader) {
       return `<h2>${escapeHtml(p.replace(/^#+\s+/, ''))}</h2>`;
     }
 
+    // Meditazione / contemplazione del mistero
+    if (/^In questo mistero/i.test(p)) {
+      return `<p class="mystery-reflection"><em>${escapeHtml(p)}</em></p>`;
+    }
+
+    // Invocazione mariana finale
+    if (/^Maria Regina della Pace/i.test(p)) {
+      return `<p class="prayer-response"><em>${escapeHtml(p)}</em></p>`;
+    }
+
     // Preghiere stanziali in versi (O Gesù mio, Padre Nostro...)
-    if (/^(O Gesù mio|Padre Nostro|Ave Maria|Gloria al padre)/i.test(p)) {
+    if (/^(O Gesù mio|Padre Nostro|Ave Maria|Gloria al padre)/i.test(p) && !p.startsWith('Ave Maria, splendore')) {
       const verseHtml = p
         .split('\n')
         .map(line => escapeHtml(line.trim()))
@@ -530,11 +543,28 @@ function formatBodyPage(text, pageNum, runningHeader) {
       return `<div class="prayer-stanza">${verseHtml}</div>`;
     }
 
-    // Intenzioni di preghiera
+    // Canto finale alla Madonna (Ave Maria, splendore del mattino)
+    if (p === 'Ave Maria, splendore del mattino') {
+      return `<h2 class="hymn-title">${escapeHtml(p)}</h2>`;
+    }
+
+    if (/^(Ave Maria, splendore|Madre non sono degno|Madre tu che soccorri|Protegga il nostro popolo)/i.test(p)) {
+      const verseHtml = p
+        .split('\n')
+        .map(line => escapeHtml(line.trim()))
+        .join('<br>');
+      return `<div class="hymn-stanza">${verseHtml}</div>`;
+    }
+
+    // Note esplicative e fonti (es. Intenzioni tratte dal discorso...)
+    if (/^Intenzioni tratte/i.test(p)) {
+      return `<p class="source-note"><em>${escapeHtml(p)}</em></p>`;
+    }
+
+    // Intenzioni di preghiera (senza simboli né box pesanti, pura eleganza tipografica)
     if (/^PREGHIAMO/i.test(p)) {
       return `
         <div class="prayer-intention">
-          <span class="intention-marker">✦</span>
           <p>${formatInline(escapeHtml(p))}</p>
         </div>
       `;
@@ -547,7 +577,7 @@ function formatBodyPage(text, pageNum, runningHeader) {
 
     // Ellissi o separatori
     if (p === '…' || p === '...') {
-      return `<div class="text-ellipsis">❦</div>`;
+      return `<div class="editorial-divider"></div>`;
     }
 
     // Citazioni / Epigrafi con >
@@ -556,8 +586,8 @@ function formatBodyPage(text, pageNum, runningHeader) {
       return `<blockquote>${formatInline(escapeHtml(quoteText))}</blockquote>`;
     }
 
-    // Paragrafo standard con drop cap iniziale se è il primo paragrafo
-    const isDropcap = !firstTextSeen ? 'class="dropcap"' : '';
+    // Paragrafo standard con drop cap iniziale se è testo narrativo disteso
+    const isDropcap = (!firstTextSeen && p.length > 80 && !p.startsWith('«') && !p.startsWith('"') && !p.startsWith('In questo mistero')) ? 'class="dropcap"' : '';
     firstTextSeen = true;
 
     // Se ci sono ritorni a capo singoli all'interno del paragrafo, preservali

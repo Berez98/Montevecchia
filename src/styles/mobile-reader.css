@@ -258,13 +258,10 @@
 }
 
 .reader-separator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 1.5rem 0;
-  color: var(--text-cover-gold);
-  font-size: 1.2rem;
-  opacity: 0.6;
+  width: 48px;
+  height: 1px;
+  background: rgba(44, 40, 37, 0.2);
+  margin: 2rem auto;
 }
 
 /* Pulsante flottante per tornare in cima */

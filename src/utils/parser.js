@@ -141,7 +141,7 @@ export const SAMPLE_PAGES = [
  * @param {number} maxCharsPerPage - Soglia caratteri per pagina in modalità automatica
  * @returns {Array<{type: string, density: string, html: string, pageNumber: number}>}
  */
-export function parseRawContent(rawText, maxCharsPerPage = 620) {
+export function parseRawContent(rawText, maxCharsPerPage = 620, coverImageUrl = null) {
   if (!rawText || typeof rawText !== 'string') {
     return SAMPLE_PAGES;
   }
@@ -225,7 +225,7 @@ export function parseRawContent(rawText, maxCharsPerPage = 620) {
         pageNumber: 1,
         title: 'Recita del Santo Rosario',
         header: 'Copertina',
-        html: formatCoverPage(pageText)
+        html: formatCoverPage(pageText, coverImageUrl)
       });
     } else if (isLast && pageText.length > 400) {
       // È una lettura estesa (es. testo finale di don Giussani): la impaginiamo come lettura interna
@@ -407,7 +407,7 @@ function formatPageContent(text, pageNum, isFirst, isLast, runningHeader = '') {
   return formatBodyPage(text, pageNum, runningHeader);
 }
 
-function formatCoverPage(text) {
+function formatCoverPage(text, coverImageUrl = null) {
   const lines = text
     .split(/\n+/)
     .map(l => l.trim())
@@ -439,7 +439,11 @@ function formatCoverPage(text) {
       <div class="cover-middle">
         <h1 class="cover-title">${escapeHtml(title)}</h1>
         ${subtitle ? `<p class="cover-subtitle">${escapeHtml(subtitle)}</p>` : ''}
-        ${hasPhotoNote ? `
+        ${coverImageUrl ? `
+          <div class="cover-photo-wrapper">
+            <img src="${escapeHtml(coverImageUrl)}" alt="Rosa Mistica" class="cover-photo" />
+          </div>
+        ` : (hasPhotoNote ? `
           <div class="cover-photo-frame" title="${escapeHtml(photoNoteText)}">
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -448,7 +452,7 @@ function formatCoverPage(text) {
             </svg>
             <span class="photo-caption">${escapeHtml(photoNoteText)}</span>
           </div>
-        ` : ''}
+        ` : '')}
       </div>
       <div class="cover-bottom">
         <div class="cover-ornament"></div>

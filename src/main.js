@@ -1,5 +1,6 @@
 import { PageFlip } from 'page-flip';
 import bookSource from '../content/book-source.txt?raw';
+import roseImage from '../content/Rose.jpeg';
 import { parseRawContent, SAMPLE_PAGES } from './utils/parser.js';
 import { setupControls } from './utils/controls.js';
 
@@ -11,8 +12,8 @@ function initBook() {
   const bookElement = document.getElementById('book');
   if (!bookElement) return;
 
-  // Ingestione del testo sorgente tramite il parser editoriale
-  let pages = parseRawContent(bookSource);
+  // Ingestione del testo sorgente tramite il parser editoriale con l'immagine di copertina
+  let pages = parseRawContent(bookSource, 620, roseImage);
   if (!pages || pages.length === 0) {
     pages = SAMPLE_PAGES;
   }

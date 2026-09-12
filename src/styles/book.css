@@ -6,8 +6,10 @@
 
 #app {
   width: 100%;
-  height: 100dvh;
-  min-height: 100vh;
+  /* svh = altezza minima stabile: la barra URL mobile che compare/scompare
+     non deve cambiare la capienza delle pagine né riavviare l'impaginazione */
+  height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   background: var(--bg-desk);
@@ -23,6 +25,9 @@
   justify-content: center;
   padding: 1rem 1.5rem 4.5rem;
   overflow: hidden;
+  /* lo swipe orizzontale appartiene al libro, quello verticale al browser */
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior: contain;
 }
 
 .flipbook {
@@ -115,6 +120,25 @@
   flex: 1;
   font-size: var(--fs-body);
   overflow: hidden;
+}
+
+/* ==========================================================================
+   Stato di sfoglio: si riducono gli effetti che obbligano la GPU a ridipingere
+   ogni fotogramma (blur, ombre sfumate, texture), causa dei glitch su mobile.
+   ========================================================================== */
+#app.is-flipping .controls-bar,
+#app.is-flipping .reading-progress {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#app.is-flipping .flipbook {
+  box-shadow: none;
+}
+
+#app.is-flipping .page {
+  --texture-paper: none;
+  box-shadow: none;
 }
 
 .page-footer {
@@ -316,3 +340,22 @@
     margin-top: 1rem;
   }
 }
+
+/* In modalità pagina singola l'ombra del dorso e i raccordi asimmetrici non
+   hanno più senso e generano scie di ridisegno durante lo sfoglio. */
+@media (max-width: 700px) {
+  .page.--left,
+  .page.--right {
+    border-radius: var(--book-radius);
+    box-shadow: var(--shadow-page-edge);
+  }
+
+  .page-cover {
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.35) 100%);
+  }
+
+  .page-backcover {
+    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(255, 255, 255, 0.05) 100%);
+  }
+}
+

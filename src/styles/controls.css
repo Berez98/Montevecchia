@@ -240,6 +240,14 @@
 
 /* --------------------------------------------------------------- mobile -- */
 @media (max-width: 600px) {
+  /* Il blur sopra l'area animata è la prima causa di sfarfallio sui GPU mobili */
+  .controls-bar,
+  .goto-popover {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgb(251, 249, 245);
+  }
+
   .controls-bar {
     gap: 0.15rem;
     padding: 0.25rem 0.5rem;

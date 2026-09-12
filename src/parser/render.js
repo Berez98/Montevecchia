@@ -10,7 +10,7 @@ export function detectPageHeader(text) {
   if (mistero) return `${mistero[1]} Mistero Glorioso`;
   if (/Intenzioni tratte|L’amore è la forza|San Giovanni Paolo/i.test(text)) return 'Intenzioni di Preghiera';
   if (/Canto finale|Ave Maria, splendore/i.test(text)) return 'Canto Finale';
-  if (/Quos redemisti|Giussani|C’è un nulla che non viene perduto/i.test(text)) return 'Riflessione Conclusiva';
+  if (/Quos redemisti|C’è un nulla che non viene perduto/i.test(text)) return 'Riflessione Conclusiva';
 
   const heading = text.match(/^#{1,3}\s+(.+)$/m);
   if (heading && !/foto|immagine/i.test(heading[1])) return heading[1].trim();

@@ -13,12 +13,23 @@ const RESIZE_DEBOUNCE_MS = 200;
 let pageFlip = null;
 let lastBox = null;
 let resizeTimer = null;
+let flippingTimer = null;
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const nextFrame = (fn) => requestAnimationFrame(() => requestAnimationFrame(fn));
 
 function el(id) {
   return document.getElementById(id);
+}
+
+// Marca lo stato di sfoglio con una rete di sicurezza: se l'animazione non
+// si conclude (scheda in background, rAF sospeso) la classe va comunque tolta
+function setFlipping(active) {
+  clearTimeout(flippingTimer);
+  el('app')?.classList.toggle('is-flipping', active);
+  if (active) {
+    flippingTimer = setTimeout(() => el('app')?.classList.remove('is-flipping'), 1500);
+  }
 }
 
 // ---------------------------------------------------------------- costruzione
@@ -92,6 +103,7 @@ function buildBook({ preservePage = true } = {}) {
     preservePage && getState().total > 1 ? getState().currentPage / (getState().total - 1) : null;
 
   // StPageFlip avvolge il nodo che riceve: si riparte sempre da un contenitore pulito
+  setFlipping(false);
   pageFlip?.destroy();
   pageFlip = null;
   container.innerHTML = '';
@@ -108,7 +120,11 @@ function buildBook({ preservePage = true } = {}) {
 
   const syncPage = () => setState({ currentPage: pageFlip.getCurrentPageIndex() });
   pageFlip.on('flip', syncPage);
-  pageFlip.on('changeState', syncPage);
+  pageFlip.on('changeState', (e) => {
+    // Durante l'animazione si disattivano blur e ombre costose: su mobile causano sfarfallio
+    setFlipping(e.data !== 'read');
+    syncPage();
+  });
 
   const target =
     previousRatio !== null
@@ -163,6 +179,12 @@ function handleResize() {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     if (getState().mode !== 'flipbook') return;
+
+    // Ricostruire durante un'animazione produce sfarfallio: si riprova dopo
+    if (el('app')?.classList.contains('is-flipping')) {
+      handleResize();
+      return;
+    }
 
     const box = computePageBox(el('book-container'));
     if (!box) return;

@@ -195,26 +195,71 @@ export function parseRawContent(rawText, maxCharsPerPage = 1100) {
 
   // Se abbiamo pagine, calcoliamo testatine dinamiche e layout editoriale
   let currentHeader = 'Rosario a Montevecchia';
+  const generatedPages = [];
 
-  return rawPages.map((pageText, index) => {
+  rawPages.forEach((pageText, index) => {
     const isFirst = index === 0;
     const isLast = index === rawPages.length - 1;
-    const density = (isFirst || isLast) ? 'hard' : 'soft';
-    const pageNum = index + 1;
-
-    // Rileva testatina contestuale per la pagina corrente
     const detectedHeader = detectPageHeader(pageText);
     if (detectedHeader) {
       currentHeader = detectedHeader;
     }
 
-    return {
-      type: isFirst ? 'cover' : isLast ? 'backcover' : 'text',
-      density,
-      pageNumber: pageNum,
-      html: formatPageContent(pageText, pageNum, isFirst, isLast, currentHeader)
-    };
+    if (isFirst) {
+      generatedPages.push({
+        type: 'cover',
+        density: 'hard',
+        pageNumber: 1,
+        title: 'Recita del Santo Rosario',
+        header: 'Copertina',
+        html: formatCoverPage(pageText)
+      });
+    } else if (isLast && pageText.length > 400) {
+      // È una lettura estesa (es. testo finale di don Giussani): la impaginiamo come lettura interna
+      const textPageNum = generatedPages.length + 1;
+      generatedPages.push({
+        type: 'text',
+        density: 'soft',
+        pageNumber: textPageNum,
+        title: 'Riflessione Conclusiva',
+        header: 'Riflessione Conclusiva',
+        html: formatBodyPage(pageText, textPageNum, 'Riflessione Conclusiva')
+      });
+
+      // E aggiungiamo la vera quarta di copertina cartonata
+      const backCoverNum = generatedPages.length + 1;
+      generatedPages.push({
+        type: 'backcover',
+        density: 'hard',
+        pageNumber: backCoverNum,
+        title: 'Quarta di Copertina',
+        header: 'Quarta di Copertina',
+        html: formatBackcoverPage(pageText)
+      });
+    } else if (isLast) {
+      const backCoverNum = generatedPages.length + 1;
+      generatedPages.push({
+        type: 'backcover',
+        density: 'hard',
+        pageNumber: backCoverNum,
+        title: 'Quarta di Copertina',
+        header: 'Quarta di Copertina',
+        html: formatBackcoverPage(pageText)
+      });
+    } else {
+      const pageNum = generatedPages.length + 1;
+      generatedPages.push({
+        type: 'text',
+        density: 'soft',
+        pageNumber: pageNum,
+        title: detectedHeader || `Pagina ${pageNum}`,
+        header: currentHeader,
+        html: formatBodyPage(pageText, pageNum, currentHeader)
+      });
+    }
   });
+
+  return generatedPages;
 }
 
 function detectPageHeader(text) {
@@ -349,21 +394,23 @@ function formatBackcoverPage(text) {
     .map(p => p.trim())
     .filter(Boolean);
 
-  const quotePara = paragraphs.filter(p => !p.startsWith('Tratto da')).join('\n\n');
-  const sourcePara = paragraphs.find(p => p.startsWith('Tratto da'));
+  let quotePara = paragraphs.filter(p => !p.startsWith('Tratto da')).join('\n\n');
+  const sourcePara = paragraphs.find(p => p.startsWith('Tratto da')) || 'Tratto da L. Giussani, 30/4/2000';
+
+  if (quotePara.length > 250) {
+    quotePara = '«Quos redemisti, tu conserva, Christe»: quelli che tu hai redenti - quelli che tu hai voluto, progettati per te -, tu salvali, tu conservali, Cristo. La gioia è la sicurezza che avviene nel mondo per il fatto di essere stati toccati dal Mistero, nel possesso di Cristo.';
+  }
 
   return `
     <div class="page-content backcover-inner">
       <div class="cover-ornament"></div>
       <div class="backcover-quote">
-        <p style="font-family: var(--font-serif); font-style: italic; line-height: 1.5; font-size: 0.92rem; color: #e2e8f0;">
+        <p style="font-family: var(--font-serif); font-style: italic; line-height: 1.6; font-size: 0.94rem; color: #e2e8f0;">
           ${formatInline(escapeHtml(quotePara))}
         </p>
-        ${sourcePara ? `
-          <p class="backcover-source" style="font-family: var(--font-sans); font-size: 0.75rem; letter-spacing: 0.05em; color: var(--text-cover-gold); margin-top: 1rem;">
-            ${escapeHtml(sourcePara)}
-          </p>
-        ` : ''}
+        <p class="backcover-source" style="font-family: var(--font-sans); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--text-cover-gold); margin-top: 1.2rem;">
+          ${escapeHtml(sourcePara)}
+        </p>
       </div>
       <div class="cover-ornament"></div>
       <div style="margin-top: 1.5rem;">

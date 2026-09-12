@@ -96,6 +96,21 @@
   text-align: justify;
   hyphens: auto;
   color: var(--text-main);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 45, 25, 0.25) transparent;
+}
+
+.page-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.page-body::-webkit-scrollbar-thumb {
+  background-color: rgba(140, 45, 25, 0.25);
+  border-radius: 4px;
 }
 
 .page-body p {
@@ -444,4 +459,82 @@
   font-family: var(--font-sans);
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Ottimizzazione Specifica per Schermi Smartphone (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  #book-container {
+    padding: 0.4rem 0.4rem 3.8rem 0.4rem;
+  }
+
+  .page-content {
+    padding: 0.85rem 0.95rem;
+  }
+
+  /* In portrait su mobile c'è una sola pagina, azzeriamo la disparità del margine dorsale */
+  .page.--left .page-content,
+  .page.--right .page-content {
+    padding-left: 0.95rem;
+    padding-right: 0.95rem;
+  }
+
+  .page-header {
+    font-size: 0.68rem;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .page-body {
+    font-size: 0.88rem;
+    line-height: 1.44;
+  }
+
+  .page-body p {
+    margin-bottom: 0.65rem;
+  }
+
+  .mystery-heading {
+    margin-bottom: 0.8rem;
+  }
+
+  .mystery-number {
+    font-size: 0.68rem;
+  }
+
+  .mystery-name {
+    font-size: 1.12rem;
+  }
+
+  .prayer-stanza {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    padding: 0.5rem 0.75rem;
+    margin: 0.75rem 0;
+  }
+
+  .prayer-intention {
+    font-size: 0.76rem;
+    padding: 0.5rem 0.65rem;
+    margin: 0.75rem 0;
+  }
+
+  .cover-inner {
+    padding: 1.25rem 1rem;
+  }
+
+  .cover-title {
+    font-size: 1.55rem;
+    margin-top: 1rem;
+  }
+
+  .cover-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .cover-photo-frame {
+    margin: 0.75rem auto 0.4rem auto;
+    padding: 0.5rem 0.8rem;
+  }
 }

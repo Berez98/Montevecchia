@@ -1,0 +1,295 @@
+/* ==========================================================================
+   MODALITÀ SMARTPHONE (MOBILE READER)
+   Layout a scorrimento continuo, ottimizzato specificamente per display verticali
+   ========================================================================== */
+
+:root {
+  --reader-font-size: 1.05rem;
+  --reader-line-height: 1.6;
+}
+
+/* Contenitore principale del lettore smartphone */
+.mobile-reader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f7f4ee;
+  background-image: radial-gradient(circle at 50% 10%, #fffdfa 0%, #f4f0e6 100%);
+  color: var(--text-main);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra superiore fissa */
+.reader-topbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  background: rgba(251, 249, 245, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(44, 40, 37, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  z-index: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.reader-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid rgba(44, 40, 37, 0.15);
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reader-btn:hover,
+.reader-btn:active {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.reader-title-badge {
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.reader-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.reader-font-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(44, 40, 37, 0.15);
+  background: transparent;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.reader-font-btn:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Cassetto / Menu Indice dei Contenuti */
+.reader-drawer {
+  position: sticky;
+  top: 54px;
+  left: 0;
+  right: 0;
+  background: #fbf9f5;
+  border-bottom: 2px solid var(--accent-color);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  padding: 1rem 1.25rem;
+  z-index: 590;
+  max-height: 70vh;
+  overflow-y: auto;
+  display: none;
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reader-drawer.is-open {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reader-drawer-title {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--accent-color);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.reader-toc-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reader-toc-link {
+  display: block;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  text-decoration: none;
+  background: rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.reader-toc-link:hover,
+.reader-toc-link:active {
+  background: rgba(140, 45, 25, 0.08);
+  color: var(--accent-color);
+  font-weight: 500;
+  transform: translateX(4px);
+}
+
+/* Corpo del testo a scorrimento */
+.reader-content {
+  flex: 1;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 5rem 1rem;
+  box-sizing: border-box;
+}
+
+/* Sezioni e schede di lettura */
+.reader-card {
+  background: #fbf9f5;
+  border: 1px solid rgba(44, 40, 37, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem 1.25rem;
+  margin-bottom: 1.75rem;
+  position: relative;
+}
+
+.reader-card-header {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-bottom: 0.35rem;
+}
+
+.reader-card-body {
+  font-family: var(--font-serif);
+  font-size: var(--reader-font-size);
+  line-height: var(--reader-line-height);
+  color: var(--text-main);
+  text-align: justify;
+  hyphens: auto;
+}
+
+.reader-card-body p {
+  margin-bottom: 0.9rem;
+  text-indent: 1.25em;
+}
+
+.reader-card-body p:first-of-type,
+.reader-card-body h2 + p,
+.reader-card-body .mystery-heading + p {
+  text-indent: 0;
+}
+
+/* Copertina in modalità smartphone */
+.reader-card-cover {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #f8fafc;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  text-align: center;
+  padding: 2.2rem 1.5rem;
+}
+
+.reader-card-cover .cover-title {
+  font-size: 1.8rem;
+  margin-top: 1rem;
+  color: var(--text-cover-gold);
+}
+
+.reader-card-cover .cover-subtitle {
+  color: #cbd5e1;
+  font-size: 1.05rem;
+  margin-top: 0.5rem;
+}
+
+/* Quarta di copertina in modalità smartphone */
+.reader-card-backcover {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #94a3b8;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  text-align: center;
+  padding: 2.2rem 1.5rem;
+}
+
+.reader-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  color: var(--text-cover-gold);
+  font-size: 1.2rem;
+  opacity: 0.6;
+}
+
+/* Pulsante flottante per tornare in cima */
+.reader-back-to-top {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--text-main);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+  z-index: 550;
+}
+
+.reader-back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+}

@@ -155,11 +155,12 @@ export function parseRawContent(rawText, maxCharsPerPage = 1100) {
     return SAMPLE_PAGES;
   }
 
-  // 1. Verifica se è presente il delimitatore esplicito ---PAGE---
+  // 1. Verifica se è presente il delimitatore esplicito (-- PAGE --, ---PAGE---, ecc.)
   let rawPages = [];
-  if (trimmed.includes('---PAGE---')) {
+  const pageDelimiterRegex = /[-]{2,}\s*PAGE\s*[-]{2,}/i;
+  if (pageDelimiterRegex.test(trimmed)) {
     rawPages = trimmed
-      .split(/---PAGE---/g)
+      .split(/[-]{2,}\s*PAGE\s*[-]{2,}/gi)
       .map(p => p.trim())
       .filter(Boolean);
   } else {
@@ -192,27 +193,48 @@ export function parseRawContent(rawText, maxCharsPerPage = 1100) {
     return SAMPLE_PAGES;
   }
 
-  // Se abbiamo solo 1 o 2 pagine, assicuriamo una struttura a libro
-  let runningHeader = '';
+  // Se abbiamo pagine, calcoliamo testatine dinamiche e layout editoriale
+  let currentHeader = 'Rosario a Montevecchia';
+
   return rawPages.map((pageText, index) => {
     const isFirst = index === 0;
     const isLast = index === rawPages.length - 1;
     const density = (isFirst || isLast) ? 'hard' : 'soft';
     const pageNum = index + 1;
 
-    // Estrai eventuale titolo per running header
-    const headerMatch = pageText.match(/^#{1,3}\s+(.+)$/m);
-    if (headerMatch) {
-      runningHeader = headerMatch[1].trim();
+    // Rileva testatina contestuale per la pagina corrente
+    const detectedHeader = detectPageHeader(pageText);
+    if (detectedHeader) {
+      currentHeader = detectedHeader;
     }
 
     return {
       type: isFirst ? 'cover' : isLast ? 'backcover' : 'text',
       density,
       pageNumber: pageNum,
-      html: formatPageContent(pageText, pageNum, isFirst, isLast, runningHeader)
+      html: formatPageContent(pageText, pageNum, isFirst, isLast, currentHeader)
     };
   });
+}
+
+function detectPageHeader(text) {
+  const misteroMatch = text.match(/(Primo|Secondo|Terzo|Quarto|Quinto)\s+Mistero\s+Glorioso/i);
+  if (misteroMatch) {
+    return `${misteroMatch[1]} Mistero Glorioso`;
+  }
+  if (/Intenzioni tratte dal discorso/i.test(text)) {
+    return 'Intenzioni di Preghiera';
+  }
+  if (/Canto finale/i.test(text)) {
+    return 'Canto Finale';
+  }
+  if (/^#{1,3}\s+(.+)$/m.test(text)) {
+    const titleMatch = text.match(/^#{1,3}\s+(.+)$/m);
+    if (titleMatch && !/foto|immagine/i.test(titleMatch[1])) {
+      return titleMatch[1].trim();
+    }
+  }
+  return null;
 }
 
 function pages_push(pagesArray, paraList) {
@@ -275,34 +297,46 @@ function formatCoverPage(text) {
     .map(l => l.trim())
     .filter(Boolean);
 
-  let title = 'Rosario a Montevecchia';
-  let subtitle = '';
-  let author = 'Coppi e Berez';
+  let title = 'Recita del Santo Rosario';
+  let subtitle = 'Domenica 13 settembre 2026 – Montevecchia';
+  let hasPhotoNote = false;
+  let photoNoteText = '';
 
-  if (lines.length === 1) {
-    title = lines[0].replace(/^#+\s*/, '');
-  } else if (lines.length === 2) {
-    title = lines[0].replace(/^#+\s*/, '');
-    subtitle = lines[1].replace(/^#+\s*/, '');
-  } else if (lines.length >= 3) {
-    author = lines[0].replace(/^#+\s*/, '');
-    title = lines[1].replace(/^#+\s*/, '');
-    subtitle = lines.slice(2).join(' ').replace(/^#+\s*/, '');
-  }
+  lines.forEach(line => {
+    const clean = line.replace(/^#+\s*/, '').trim();
+    if (/foto|immagine/i.test(clean)) {
+      hasPhotoNote = true;
+      photoNoteText = clean;
+    } else if (/Rosario/i.test(clean)) {
+      title = clean;
+    } else if (/Montevecchia|settembre|Domenica/i.test(clean)) {
+      subtitle = clean;
+    }
+  });
 
   return `
     <div class="page-content cover-inner">
-      <div>
-        <p class="cover-author">${escapeHtml(author)}</p>
+      <div class="cover-top">
+        <p class="cover-edition">EDIZIONE SPECIALE</p>
         <div class="cover-ornament"></div>
       </div>
-      <div>
+      <div class="cover-middle">
         <h1 class="cover-title">${escapeHtml(title)}</h1>
         ${subtitle ? `<p class="cover-subtitle">${escapeHtml(subtitle)}</p>` : ''}
+        ${hasPhotoNote ? `
+          <div class="cover-photo-frame" title="${escapeHtml(photoNoteText)}">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span class="photo-caption">${escapeHtml(photoNoteText)}</span>
+          </div>
+        ` : ''}
       </div>
-      <div>
+      <div class="cover-bottom">
         <div class="cover-ornament"></div>
-        <p style="font-size:0.8rem; letter-spacing:0.1em; opacity:0.8;">EDIZIONE WEB</p>
+        <p class="cover-location">Santuario Beata Vergine del Carmelo</p>
       </div>
     </div>
   `;
@@ -310,18 +344,31 @@ function formatCoverPage(text) {
 
 function formatBackcoverPage(text) {
   const clean = text.replace(/^#+\s*/, '').trim();
+  const paragraphs = clean
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean);
+
+  const quotePara = paragraphs.filter(p => !p.startsWith('Tratto da')).join('\n\n');
+  const sourcePara = paragraphs.find(p => p.startsWith('Tratto da'));
+
   return `
     <div class="page-content backcover-inner">
-      <div>
-        <div class="cover-ornament"></div>
-        <p style="font-family: var(--font-serif); font-style: italic; margin-bottom: 1.5rem; color: #e2e8f0;">
-          ${escapeHtml(clean)}
+      <div class="cover-ornament"></div>
+      <div class="backcover-quote">
+        <p style="font-family: var(--font-serif); font-style: italic; line-height: 1.5; font-size: 0.92rem; color: #e2e8f0;">
+          ${formatInline(escapeHtml(quotePara))}
         </p>
-        <div class="cover-ornament"></div>
+        ${sourcePara ? `
+          <p class="backcover-source" style="font-family: var(--font-sans); font-size: 0.75rem; letter-spacing: 0.05em; color: var(--text-cover-gold); margin-top: 1rem;">
+            ${escapeHtml(sourcePara)}
+          </p>
+        ` : ''}
       </div>
-      <div style="margin-top: 2rem;">
-        <p style="font-family: var(--font-sans); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #64748b;">
-          Finito di stampare nel 2026
+      <div class="cover-ornament"></div>
+      <div style="margin-top: 1.5rem;">
+        <p style="font-family: var(--font-sans); font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: #64748b;">
+          Montevecchia • 2026
         </p>
       </div>
     </div>
@@ -337,18 +384,58 @@ function formatBodyPage(text, pageNum, runningHeader) {
   let firstTextSeen = false;
 
   const formattedElements = paragraphs.map((p) => {
-    // Intestazioni Markdown
+    // Intestazioni mistero glorioso
+    const mysteryMatch = p.match(/^(Primo|Secondo|Terzo|Quarto|Quinto)\s+Mistero\s+Glorioso:\s*(.*)/i);
+    if (mysteryMatch) {
+      return `
+        <div class="mystery-heading">
+          <span class="mystery-number">${escapeHtml(mysteryMatch[1])} Mistero Glorioso</span>
+          <h2 class="mystery-name">${escapeHtml(mysteryMatch[2])}</h2>
+        </div>
+      `;
+    }
+
+    if (/^Canto finale/i.test(p)) {
+      return `<h2 class="section-title">${escapeHtml(p)}</h2>`;
+    }
+
     if (p.startsWith('### ')) {
       return `<h3>${escapeHtml(p.replace(/^###\s+/, ''))}</h3>`;
     }
-    if (p.startsWith('## ')) {
-      return `<h2>${escapeHtml(p.replace(/^##\s+/, ''))}</h2>`;
-    }
-    if (p.startsWith('# ')) {
-      return `<h2>${escapeHtml(p.replace(/^#\s+/, ''))}</h2>`;
+    if (p.startsWith('## ') || p.startsWith('# ')) {
+      return `<h2>${escapeHtml(p.replace(/^#+\s+/, ''))}</h2>`;
     }
 
-    // Citazioni / Epigrafi
+    // Preghiere stanziali in versi (O Gesù mio, Padre Nostro...)
+    if (/^(O Gesù mio|Padre Nostro|Ave Maria|Gloria al padre)/i.test(p)) {
+      const verseHtml = p
+        .split('\n')
+        .map(line => escapeHtml(line.trim()))
+        .join('<br>');
+      return `<div class="prayer-stanza">${verseHtml}</div>`;
+    }
+
+    // Intenzioni di preghiera
+    if (/^PREGHIAMO/i.test(p)) {
+      return `
+        <div class="prayer-intention">
+          <span class="intention-marker">✦</span>
+          <p>${formatInline(escapeHtml(p))}</p>
+        </div>
+      `;
+    }
+
+    // Citazioni fonte (es. Tratto da...)
+    if (/^Tratto da/i.test(p)) {
+      return `<p class="source-credit"><em>${escapeHtml(p)}</em></p>`;
+    }
+
+    // Ellissi o separatori
+    if (p === '…' || p === '...') {
+      return `<div class="text-ellipsis">❦</div>`;
+    }
+
+    // Citazioni / Epigrafi con >
     if (p.startsWith('> ')) {
       const quoteText = p.replace(/^>\s*/gm, '');
       return `<blockquote>${formatInline(escapeHtml(quoteText))}</blockquote>`;
@@ -358,7 +445,13 @@ function formatBodyPage(text, pageNum, runningHeader) {
     const isDropcap = !firstTextSeen ? 'class="dropcap"' : '';
     firstTextSeen = true;
 
-    return `<p ${isDropcap}>${formatInline(escapeHtml(p))}</p>`;
+    // Se ci sono ritorni a capo singoli all'interno del paragrafo, preservali
+    const contentWithBreaks = p
+      .split('\n')
+      .map(line => formatInline(escapeHtml(line.trim())))
+      .join('<br>');
+
+    return `<p ${isDropcap}>${contentWithBreaks}</p>`;
   }).join('');
 
   const displayHeader = runningHeader || 'Rosario a Montevecchia';

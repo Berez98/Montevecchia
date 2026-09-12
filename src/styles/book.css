@@ -240,21 +240,150 @@
   margin-top: 0.75rem;
 }
 
-.cover-author {
+.cover-top,
+.cover-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cover-edition {
   font-family: var(--font-sans);
-  font-size: 0.9rem;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: #e2e8f0;
-  margin-bottom: 1.5rem;
+  color: var(--text-cover-gold);
+  opacity: 0.9;
+}
+
+.cover-location {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.cover-photo-frame {
+  margin: 1.5rem auto 0.5rem auto;
+  border: 1px dashed rgba(212, 175, 55, 0.45);
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-cover-gold);
+  max-width: 220px;
+}
+
+.photo-caption {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  letter-spacing: 0.05em;
 }
 
 .cover-ornament {
   width: 48px;
   height: 2px;
   background: var(--text-cover-gold);
-  margin: 1.5rem auto;
+  margin: 1.2rem auto;
   opacity: 0.7;
+}
+
+/* Stili specifici per i Misteri e le Preghiere */
+.mystery-heading {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.mystery-number {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: 0.35rem;
+}
+
+.mystery-name {
+  font-family: var(--font-title);
+  font-size: 1.28rem;
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
+.section-title {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  text-align: center;
+  color: var(--accent-color);
+  margin-bottom: 1.2rem;
+}
+
+/* Stanze di preghiera (versi ritmati) */
+.prayer-stanza {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-main);
+  background: rgba(140, 45, 25, 0.04);
+  border-left: 2px solid var(--accent-color);
+  padding: 0.75rem 1.2rem;
+  margin: 1.2rem 0;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Box per le intenzioni comunitarie */
+.prayer-intention {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin: 1.2rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  line-height: 1.45;
+  color: var(--text-main);
+}
+
+.prayer-intention p {
+  margin: 0;
+  text-indent: 0;
+  font-weight: 600;
+}
+
+.intention-marker {
+  color: var(--accent-color);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.source-credit {
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.text-ellipsis {
+  text-align: center;
+  color: var(--text-muted);
+  opacity: 0.6;
+  font-size: 1.1rem;
+  margin: 1.2rem 0;
 }
 
 /* Retrocopertina */

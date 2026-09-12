@@ -60,44 +60,87 @@
   justify-content: space-between;
 }
 
+/* Spazio di respiro addizionale vicino al dorso/rilegatura */
+.page.--left .page-content {
+  padding-right: calc(var(--page-padding) * 1.25);
+}
+
+.page.--right .page-content {
+  padding-left: calc(var(--page-padding) * 1.25);
+}
+
 /* Tipografia del corpo editoriale */
 .page-header {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   padding-bottom: 0.4rem;
   margin-bottom: 1rem;
 }
 
+.page.--left .page-header {
+  text-align: left;
+}
+
+.page.--right .page-header {
+  text-align: right;
+}
+
 .page-body {
   flex: 1;
-  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
-  line-height: 1.65;
+  font-size: clamp(0.92rem, 1.35vw, 1.12rem);
+  line-height: 1.55;
   text-align: justify;
   hyphens: auto;
   color: var(--text-main);
 }
 
 .page-body p {
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
   text-indent: 1.25em;
 }
 
-.page-body p:first-of-type {
+.page-body p:first-of-type,
+.page-body h2 + p,
+.page-body h3 + p {
   text-indent: 0;
 }
 
 .page-body h2 {
   font-family: var(--font-title);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 500;
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.1rem;
   color: var(--accent-color);
   letter-spacing: 0.05em;
+}
+
+.page-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 0.4rem;
+  margin-bottom: 0.8rem;
+  color: var(--text-main);
+}
+
+.page-body blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95em;
+  line-height: 1.5;
+  border-left: 2px solid var(--accent-color);
+  padding: 0.5rem 0.8rem 0.5rem 1.2rem;
+  margin: 1rem 0;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 0 4px 4px 0;
 }
 
 /* Drop-cap iniziale */
@@ -112,10 +155,10 @@
   color: var(--accent-color);
 }
 
-/* Numerazione a piè di pagina */
+/* Numerazione a piè di pagina alternata */
 .page-footer {
   font-family: var(--font-sans);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -129,6 +172,34 @@
 
 .page.--right .page-footer {
   justify-content: flex-end;
+}
+
+/* Risguardi (Endpaper) */
+.page-endpaper {
+  background-color: #f7f4ec;
+}
+
+.endpaper-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.endpaper-ornament {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent-color);
+}
+
+.endpaper-text {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 /* --- Copertine Rigide (Hard Cover) --- */

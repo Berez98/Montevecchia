@@ -141,129 +141,246 @@ export const SAMPLE_PAGES = [
  * @param {number} maxCharsPerPage - Soglia caratteri per pagina in modalità automatica
  * @returns {Array<{type: string, density: string, html: string, pageNumber: number}>}
  */
-export function parseRawContent(rawText, maxCharsPerPage = 1200) {
+export function parseRawContent(rawText, maxCharsPerPage = 1100) {
   if (!rawText || typeof rawText !== 'string') {
     return SAMPLE_PAGES;
   }
 
-  const trimmed = rawText.trim();
-  if (!trimmed) {
+  // Rimuovi eventuali istruzioni iniziali di commento dal template
+  const cleanedText = cleanSourceText(rawText);
+  const trimmed = cleanedText.trim();
+
+  // Se non c'è testo reale oltre ai commenti del template, restituisci le pagine di prova
+  if (!trimmed || isOnlyTemplateComments(rawText)) {
     return SAMPLE_PAGES;
   }
 
   // 1. Verifica se è presente il delimitatore esplicito ---PAGE---
+  let rawPages = [];
   if (trimmed.includes('---PAGE---')) {
-    const rawPages = trimmed
+    rawPages = trimmed
       .split(/---PAGE---/g)
       .map(p => p.trim())
       .filter(Boolean);
+  } else {
+    // 2. Frammentazione automatica rispettando i paragrafi (\n\n)
+    const paragraphs = trimmed
+      .split(/\n\s*\n/)
+      .map(p => p.trim())
+      .filter(Boolean);
 
-    return rawPages.map((pageText, index) => {
-      const isFirst = index === 0;
-      const isLast = index === rawPages.length - 1;
-      const density = (isFirst || isLast) ? 'hard' : 'soft';
-      const pageNum = index + 1;
+    let currentParagraphs = [];
+    let currentLength = 0;
 
-      return {
-        type: isFirst ? 'cover' : isLast ? 'backcover' : 'text',
-        density,
-        pageNumber: pageNum,
-        html: formatPageContent(pageText, pageNum, isFirst, isLast)
-      };
+    paragraphs.forEach((p) => {
+      if (currentLength + p.length > maxCharsPerPage && currentParagraphs.length > 0) {
+        pages_push(rawPages, currentParagraphs);
+        currentParagraphs = [p];
+        currentLength = p.length;
+      } else {
+        currentParagraphs.push(p);
+        currentLength += p.length;
+      }
     });
-  }
 
-  // 2. Frammentazione automatica rispettando i paragrafi (\n\n)
-  const paragraphs = trimmed
-    .split(/\n\s*\n/)
-    .map(p => p.trim())
-    .filter(Boolean);
-
-  const pages = [];
-  let currentParagraphs = [];
-  let currentLength = 0;
-
-  paragraphs.forEach((p) => {
-    if (currentLength + p.length > maxCharsPerPage && currentParagraphs.length > 0) {
-      pages.push(currentParagraphs);
-      currentParagraphs = [p];
-      currentLength = p.length;
-    } else {
-      currentParagraphs.push(p);
-      currentLength += p.length;
+    if (currentParagraphs.length > 0) {
+      pages_push(rawPages, currentParagraphs);
     }
-  });
-
-  if (currentParagraphs.length > 0) {
-    pages.push(currentParagraphs);
   }
 
-  return pages.map((paraGroup, index) => {
+  if (rawPages.length === 0) {
+    return SAMPLE_PAGES;
+  }
+
+  // Se abbiamo solo 1 o 2 pagine, assicuriamo una struttura a libro
+  let runningHeader = '';
+  return rawPages.map((pageText, index) => {
     const isFirst = index === 0;
-    const isLast = index === pages.length - 1;
+    const isLast = index === rawPages.length - 1;
     const density = (isFirst || isLast) ? 'hard' : 'soft';
     const pageNum = index + 1;
-    const pageContent = paraGroup.join('\n\n');
+
+    // Estrai eventuale titolo per running header
+    const headerMatch = pageText.match(/^#{1,3}\s+(.+)$/m);
+    if (headerMatch) {
+      runningHeader = headerMatch[1].trim();
+    }
 
     return {
       type: isFirst ? 'cover' : isLast ? 'backcover' : 'text',
       density,
       pageNumber: pageNum,
-      html: formatPageContent(pageContent, pageNum, isFirst, isLast)
+      html: formatPageContent(pageText, pageNum, isFirst, isLast, runningHeader)
     };
   });
+}
+
+function pages_push(pagesArray, paraList) {
+  pagesArray.push(paraList.join('\n\n'));
+}
+
+function isOnlyTemplateComments(text) {
+  const lines = text.split('\n');
+  const nonCommentLines = lines.filter(line => {
+    const l = line.trim();
+    return l.length > 0 && !l.startsWith('#');
+  });
+  return nonCommentLines.length === 0;
+}
+
+function cleanSourceText(text) {
+  const lines = text.split('\n');
+  let firstContentIndex = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('# Incolla qui') ||
+        line.startsWith('# Puoi separare') ||
+        line.startsWith('# ---PAGE---') ||
+        line.startsWith('# Se non inserisci') ||
+        line.startsWith('# il testo rispettando')) {
+      continue;
+    }
+    if (line.length > 0) {
+      firstContentIndex = i;
+      break;
+    }
+  }
+
+  if (firstContentIndex === -1) {
+    return '';
+  }
+
+  return lines.slice(firstContentIndex).join('\n');
 }
 
 /**
  * Formatta un blocco di testo in HTML con classi editoriali
  */
-function formatPageContent(text, pageNum, isFirst, isLast) {
+function formatPageContent(text, pageNum, isFirst, isLast, runningHeader = '') {
   if (isFirst) {
-    return `
-      <div class="page-content cover-inner">
-        <div>
-          <p class="cover-author">Opera Inedita</p>
-          <div class="cover-ornament"></div>
-        </div>
-        <div>
-          <h1 class="cover-title">${escapeHtml(text.slice(0, 60))}</h1>
-        </div>
-        <div>
-          <div class="cover-ornament"></div>
-        </div>
-      </div>
-    `;
+    return formatCoverPage(text);
   }
 
   if (isLast) {
-    return `
-      <div class="page-content backcover-inner">
-        <div class="cover-ornament"></div>
-        <p style="font-family: var(--font-serif); font-style: italic;">${escapeHtml(text)}</p>
-        <div class="cover-ornament"></div>
-      </div>
-    `;
+    return formatBackcoverPage(text);
   }
 
-  const paragraphs = text
+  return formatBodyPage(text, pageNum, runningHeader);
+}
+
+function formatCoverPage(text) {
+  const lines = text
     .split(/\n+/)
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  let title = 'Rosario a Montevecchia';
+  let subtitle = '';
+  let author = 'Coppi e Berez';
+
+  if (lines.length === 1) {
+    title = lines[0].replace(/^#+\s*/, '');
+  } else if (lines.length === 2) {
+    title = lines[0].replace(/^#+\s*/, '');
+    subtitle = lines[1].replace(/^#+\s*/, '');
+  } else if (lines.length >= 3) {
+    author = lines[0].replace(/^#+\s*/, '');
+    title = lines[1].replace(/^#+\s*/, '');
+    subtitle = lines.slice(2).join(' ').replace(/^#+\s*/, '');
+  }
+
+  return `
+    <div class="page-content cover-inner">
+      <div>
+        <p class="cover-author">${escapeHtml(author)}</p>
+        <div class="cover-ornament"></div>
+      </div>
+      <div>
+        <h1 class="cover-title">${escapeHtml(title)}</h1>
+        ${subtitle ? `<p class="cover-subtitle">${escapeHtml(subtitle)}</p>` : ''}
+      </div>
+      <div>
+        <div class="cover-ornament"></div>
+        <p style="font-size:0.8rem; letter-spacing:0.1em; opacity:0.8;">EDIZIONE WEB</p>
+      </div>
+    </div>
+  `;
+}
+
+function formatBackcoverPage(text) {
+  const clean = text.replace(/^#+\s*/, '').trim();
+  return `
+    <div class="page-content backcover-inner">
+      <div>
+        <div class="cover-ornament"></div>
+        <p style="font-family: var(--font-serif); font-style: italic; margin-bottom: 1.5rem; color: #e2e8f0;">
+          ${escapeHtml(clean)}
+        </p>
+        <div class="cover-ornament"></div>
+      </div>
+      <div style="margin-top: 2rem;">
+        <p style="font-family: var(--font-sans); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #64748b;">
+          Finito di stampare nel 2026
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+function formatBodyPage(text, pageNum, runningHeader) {
+  const paragraphs = text
+    .split(/\n\s*\n/)
     .map(p => p.trim())
     .filter(Boolean);
 
-  const formattedParas = paragraphs.map((p, i) => {
-    const isDropcap = i === 0 ? 'class="dropcap"' : '';
-    return `<p ${isDropcap}>${escapeHtml(p)}</p>`;
+  let firstTextSeen = false;
+
+  const formattedElements = paragraphs.map((p) => {
+    // Intestazioni Markdown
+    if (p.startsWith('### ')) {
+      return `<h3>${escapeHtml(p.replace(/^###\s+/, ''))}</h3>`;
+    }
+    if (p.startsWith('## ')) {
+      return `<h2>${escapeHtml(p.replace(/^##\s+/, ''))}</h2>`;
+    }
+    if (p.startsWith('# ')) {
+      return `<h2>${escapeHtml(p.replace(/^#\s+/, ''))}</h2>`;
+    }
+
+    // Citazioni / Epigrafi
+    if (p.startsWith('> ')) {
+      const quoteText = p.replace(/^>\s*/gm, '');
+      return `<blockquote>${formatInline(escapeHtml(quoteText))}</blockquote>`;
+    }
+
+    // Paragrafo standard con drop cap iniziale se è il primo paragrafo
+    const isDropcap = !firstTextSeen ? 'class="dropcap"' : '';
+    firstTextSeen = true;
+
+    return `<p ${isDropcap}>${formatInline(escapeHtml(p))}</p>`;
   }).join('');
+
+  const displayHeader = runningHeader || 'Rosario a Montevecchia';
 
   return `
     <div class="page-content">
-      <header class="page-header">Pagina ${pageNum}</header>
+      <header class="page-header">${escapeHtml(displayHeader)}</header>
       <div class="page-body">
-        ${formattedParas}
+        ${formattedElements}
       </div>
-      <footer class="page-footer">${pageNum}</footer>
+      <footer class="page-footer">
+        <span class="page-footer-content">${pageNum}</span>
+      </footer>
     </div>
   `;
+}
+
+function formatInline(str) {
+  return str
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/«(.*?)»/g, '&laquo;$1&raquo;');
 }
 
 function escapeHtml(str) {
